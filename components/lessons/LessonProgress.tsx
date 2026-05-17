@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import {
   getCourseProgress,
   progressEventName,
-} from "@/components/lesson/progress-storage";
+} from "@/components/lessons/progress-storage";
 
 interface LessonProgressProps {
   courseId: string;

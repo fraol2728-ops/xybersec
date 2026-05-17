@@ -7,7 +7,7 @@ import {
   getCompletedLessonIds,
   progressEventName,
   saveCompletedLessonIds,
-} from "@/components/lesson/progress-storage";
+} from "@/components/lessons/progress-storage";
 import { Button } from "@/components/ui/button";
 
 interface CompleteButtonProps {

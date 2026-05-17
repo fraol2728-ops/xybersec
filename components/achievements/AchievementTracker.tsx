@@ -12,7 +12,7 @@ import {
   getAllCourseProgress,
   getCourseProgress,
   progressEventName,
-} from "@/components/lesson/progress-storage";
+} from "@/components/lessons/progress-storage";
 
 interface AchievementTrackerProps {
   courseId: string;

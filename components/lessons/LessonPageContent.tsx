@@ -5,7 +5,7 @@ import { GatedFallback } from "@/components/courses/GatedFallback";
 import {
   getCompletedLessonIds,
   progressEventName,
-} from "@/components/lesson/progress-storage";
+} from "@/components/lessons/progress-storage";
 import { hasTierAccess, useUserTier } from "@/lib/hooks/use-user-tier";
 import type { LESSON_BY_ID_QUERYResult } from "@/sanity.types";
 import { LessonLayout } from "./LessonLayout";
