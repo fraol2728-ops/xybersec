@@ -30,12 +30,12 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   const { userId } = await auth();
-  const path = req.nextUrl.pathname;
-  if (userId && path.startsWith("/dashboard")) {
-    const done = req.cookies.get("onboarding_complete")?.value === "true";
-    if (!done) {
-      return NextResponse.redirect(new URL("/onboarding", req.url));
-    }
+  const isLoggedIn = Boolean(userId);
+  const pathname = req.nextUrl.pathname;
+  const onboardingComplete = req.cookies.get("onboarding_complete")?.value;
+
+  if (!onboardingComplete && isLoggedIn && pathname === "/dashboard") {
+    return NextResponse.redirect(new URL("/onboarding", req.url));
   }
 });
 

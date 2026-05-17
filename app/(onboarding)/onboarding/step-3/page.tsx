@@ -1,51 +1,10 @@
 "use client";
-
-import { Check } from "lucide-react";
-import Link from "next/link";
+import { Bug, DollarSign, Flag, Globe, Network, Search, Terminal, UserX, Check } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { saveOnboardingStep3 } from "@/lib/actions/onboarding";
-
-const options = [
-  "Web Application Hacking",
-  "Network Penetration Testing",
-  "Malware Analysis",
-  "Digital Forensics",
-  "Social Engineering",
-  "CTF Challenges",
-  "Bug Bounty Hunting",
-  "Linux & Command Line",
-];
-
-export default function Step3Page() {
-  const [selected, setSelected] = useState<string[]>([]);
-  const [isPending, startTransition] = useTransition();
-  const router = useRouter();
-
-  const toggle = (item: string) => {
-    setSelected((prev) => (prev.includes(item) ? prev.filter((p) => p !== item) : [...prev, item]));
-  };
-
-  return (
-    <div className="w-full rounded-2xl border border-border/70 bg-card/60 p-6 sm:p-10">
-      <h1 className="text-3xl font-bold sm:text-4xl">What do you want to learn?</h1>
-      <p className="mt-2 text-muted-foreground">Select all that apply — you can always change this later</p>
-      <div className="mt-8 grid gap-3 sm:grid-cols-2">
-        {options.map((option) => {
-          const active = selected.includes(option);
-          return (
-            <button key={option} onClick={() => toggle(option)} className={`flex items-center justify-between rounded-xl border p-4 text-left ${active ? "border-cyan-400 bg-cyan-500/10" : "border-border hover:border-cyan-400/50"}`}>
-              <span>{option}</span>
-              {active ? <Check className="h-4 w-4 text-cyan-300" /> : null}
-            </button>
-          );
-        })}
-      </div>
-      <div className="mt-8 flex items-center gap-4">
-        <Button disabled={selected.length < 1 || isPending} onClick={() => startTransition(async ()=>{ await saveOnboardingStep3(selected); router.push('/dashboard'); })}>Start Learning</Button>
-        <Link href="/onboarding/step-2" className="text-sm text-muted-foreground hover:text-foreground">Back</Link>
-      </div>
-    </div>
-  );
-}
+const goals=[{icon:Globe,label:"Web App Hacking",value:"web_hacking"},{icon:Network,label:"Network Pentesting",value:"network_pentesting"},{icon:Bug,label:"Malware Analysis",value:"malware_analysis"},{icon:Search,label:"Digital Forensics",value:"digital_forensics"},{icon:UserX,label:"Social Engineering",value:"social_engineering"},{icon:Flag,label:"CTF Challenges",value:"ctf"},{icon:DollarSign,label:"Bug Bounty Hunting",value:"bug_bounty"},{icon:Terminal,label:"Linux & Command Line",value:"linux"}];
+export default function Page(){const [selected,setSelected]=useState<string[]>([]);const [isPending,startTransition]=useTransition();const router=useRouter();
+const toggle=(v:string)=>setSelected((p)=>p.includes(v)?p.filter((i)=>i!==v):[...p,v]);
+return <div className="w-full rounded-2xl border border-primary/20 bg-card/70 p-6 sm:p-8"><p className="text-sm text-muted-foreground">Step 4 of 4</p><h1 className="mt-2 text-3xl font-semibold">What do you want to learn?</h1><p className="mt-2 text-muted-foreground">Select everything that interests you</p><div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">{goals.map((o)=>{const I=o.icon;const a=selected.includes(o.value);return <button key={o.value} onClick={()=>toggle(o.value)} className={`relative rounded-xl border p-4 text-left ${a?"border-primary bg-primary/10":"border-border"}`}><I className="h-5 w-5 text-primary"/><p className="mt-2">{o.label}</p>{a&&<Check className="absolute right-3 top-3 h-4 w-4 text-primary"/>}</button>})}</div><Button className="mt-6 h-12 w-full bg-primary text-primary-foreground" disabled={selected.length<1||isPending} onClick={()=>startTransition(async()=>{await saveOnboardingStep3(selected);router.push('/onboarding/welcome');})}>Start Learning</Button></div>}
