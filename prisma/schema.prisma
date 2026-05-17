@@ -7,122 +7,124 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum AchievementCategory {
-  PROGRESS
-  COMPLETION
-  STREAK
-  COMMUNITY
-  SPECIAL
+model UserProfile {
+  id                 String           @id @default(cuid())
+  clerkId            String           @unique
+  username           String           @unique
+  birthdate          DateTime?
+
+  // Onboarding profiling fields
+  howDidYouHear      String?          // "youtube", "friend", "google", "university", "other"
+  currentRole        String?          // "student", "developer", "it_professional", "other"
+  educationLevel     String?          // "high_school", "undergraduate", "graduate", "self_taught"
+  learningGoals      String[]         // ["web_hacking", "network_security", "malware_analysis", etc.]
+
+  // Onboarding state
+  onboardingComplete Boolean          @default(false)
+  onboardingStep     Int              @default(0)
+
+  // Profile metadata
+  avatarUrl          String?
+  bio                String?
+  country            String?          @default("Ethiopia")
+
+  // Timestamps
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  // Relations
+  enrollments        Enrollment[]
+  certificates       Certificate[]
+  progress           LessonProgress[]
+
+  @@map("user_profiles")
 }
 
-model User {
-  /// Clerk user ID.
-  id                String             @id @db.Text
-  email             String?            @unique @db.Text
-  name              String?            @db.Text
-  imageUrl          String?            @db.Text
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-  courseProgresses  CourseProgress[]
-  lessonCompletions LessonCompletion[]
-  achievements      UserAchievement[]
-  pointsLedger      UserPoints[]
+model Enrollment {
+  id          String           @id @default(cuid())
+  userId      String
+  courseId    String           // Sanity course _id (string reference, not a DB foreign key)
 
-  @@index([createdAt])
-}
+  status      EnrollmentStatus @default(ACTIVE)
+  enrolledAt  DateTime         @default(now())
+  completedAt DateTime?
 
-model CourseProgress {
-  id                    String    @id @default(cuid())
-  userId                String    @db.Text
-  courseId              String    @db.Text
-  courseSlug            String?   @db.Text
-  completedLessons      Int       @default(0)
-  totalLessons          Int       @default(0)
-  progressPercentage    Decimal   @default(0) @db.Decimal(5, 2)
-  pointsEarned          Int       @default(0)
-  startedAt             DateTime  @default(now())
-  lastLessonCompletedAt DateTime?
-  completedAt           DateTime?
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Payment reference
+  paymentId   String?
+  amountPaid  Float?
+  currency    String?          @default("ETB")
+
+  user        UserProfile      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseId])
-  @@index([courseId])
-  @@index([userId, updatedAt])
-  @@index([userId, progressPercentage])
+  @@map("enrollments")
 }
 
-model LessonCompletion {
-  id                 String    @id @default(cuid())
-  userId             String    @db.Text
-  courseId           String    @db.Text
-  lessonId           String    @db.Text
-  lessonSlug         String?   @db.Text
-  moduleId           String?   @db.Text
-  completed          Boolean   @default(true)
-  progressPercentage Decimal   @default(100) @db.Decimal(5, 2)
-  pointsAwarded      Int       @default(0)
-  completedAt        DateTime  @default(now())
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
-  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+model LessonProgress {
+  id          String      @id @default(cuid())
+  userId      String
+  lessonId    String      // Sanity lesson _id (string reference)
+  courseId    String      // Sanity course _id (string reference)
+
+  completed   Boolean     @default(false)
+  completedAt DateTime?
+
+  user        UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, lessonId])
-  @@index([userId, courseId])
-  @@index([courseId, completedAt])
+  @@map("lesson_progress")
 }
 
-model Achievement {
-  id               String              @id @default(cuid())
-  key              String              @unique @db.Text
-  title            String              @db.Text
-  description      String?             @db.Text
-  category         AchievementCategory @default(PROGRESS)
-  icon             String?             @db.Text
-  pointsReward     Int                 @default(0)
-  threshold        Int?
-  isActive         Boolean             @default(true)
-  createdAt        DateTime            @default(now())
-  updatedAt        DateTime            @updatedAt
-  userAchievements UserAchievement[]
+model Certificate {
+  id              String      @id @default(cuid())
+  userId          String
+  courseId        String      // Sanity course _id
 
-  @@index([category, isActive])
+  certificateCode String      @unique @default(cuid())
+  issuedAt        DateTime    @default(now())
+  pdfUrl          String?
+
+  // Payment for cert
+  paid            Boolean     @default(false)
+  paymentId       String?
+
+  user            UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("certificates")
 }
 
-model UserAchievement {
-  id            String      @id @default(cuid())
-  userId        String      @db.Text
-  achievementId String
-  awardedAt     DateTime    @default(now())
-  progressValue Int?
-  pointsAwarded Int         @default(0)
-  metadata      Json?
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+model Payment {
+  id             String        @id @default(cuid())
+  userId         String        // Clerk user ID directly
+  courseId       String?       // Sanity course _id (null for cert payments)
 
-  @@unique([userId, achievementId])
-  @@index([achievementId, awardedAt])
-  @@index([userId, awardedAt])
+  chapaReference String?       @unique
+  amount         Float
+  currency       String        @default("ETB")
+  status         PaymentStatus @default(PENDING)
+  type           PaymentType   @default(COURSE)
+
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@map("payments")
 }
 
-model UserPoints {
-  id           String    @id @default(cuid())
-  userId       String    @db.Text
-  source       String    @db.Text
-  sourceId     String?   @db.Text
-  points       Int
-  balanceAfter Int?
-  awardedAt    DateTime  @default(now())
-  expiresAt    DateTime?
-  metadata     Json?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+enum EnrollmentStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
 
-  @@index([userId, awardedAt])
-  @@index([userId, points])
-  @@index([source, sourceId])
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum PaymentType {
+  COURSE
+  CERTIFICATE
+  SUBSCRIPTION
 }
