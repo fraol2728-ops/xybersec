@@ -1,7 +1,11 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-const isProtectedRoute = createRouteMatcher(["/dashboard(.*)", "/lessons(.*)"]);
+const isProtectedRoute = createRouteMatcher([
+  "/dashboard(.*)",
+  "/lessons(.*)",
+  "/onboarding(.*)",
+]);
 const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
@@ -23,6 +27,15 @@ export default clerkMiddleware(async (auth, req) => {
 
   if (isProtectedRoute(req)) {
     await auth.protect();
+  }
+
+  const { userId } = await auth();
+  const path = req.nextUrl.pathname;
+  if (userId && path.startsWith("/dashboard")) {
+    const done = req.cookies.get("onboarding_complete")?.value === "true";
+    if (!done) {
+      return NextResponse.redirect(new URL("/onboarding", req.url));
+    }
   }
 });
 
