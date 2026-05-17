@@ -1,11 +1,32 @@
 "use client";
 
+import { SignedIn, SignedOut } from "@clerk/nextjs";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/language";
 import { translations } from "@/lib/translations";
 import { AnimatedSection } from "./animations";
+
+function SignedInPrimaryCTA({ label }: { label: string }) {
+  const [href, setHref] = useState("/onboarding");
+
+  useEffect(() => {
+    const hasOnboardingCookie = document.cookie
+      .split("; ")
+      .some((cookie) => cookie === "onboarding_complete=true");
+    setHref(hasOnboardingCookie ? "/dashboard" : "/onboarding");
+  }, []);
+
+  return (
+    <Link href={href}>
+      <Button className="h-11 bg-cyan-400 px-8 text-[#02101d] hover:bg-cyan-300">
+        {label}
+      </Button>
+    </Link>
+  );
+}
 
 export function CTA() {
   const { lang } = useLanguage();
@@ -25,11 +46,16 @@ export function CTA() {
             {t.ctaTitle}
           </h2>
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Link href="/dashboard">
-              <Button className="h-11 bg-cyan-400 px-8 text-[#02101d] hover:bg-cyan-300">
-                {t.getQuote}
-              </Button>
-            </Link>
+            <SignedOut>
+              <Link href="/sign-up">
+                <Button className="h-11 bg-cyan-400 px-8 text-[#02101d] hover:bg-cyan-300">
+                  {t.getQuote}
+                </Button>
+              </Link>
+            </SignedOut>
+            <SignedIn>
+              <SignedInPrimaryCTA label={t.getQuote} />
+            </SignedIn>
             <Link href="#courses">
               <Button
                 variant="outline"
