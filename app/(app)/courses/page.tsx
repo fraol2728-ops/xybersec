@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import { CoursesPageContent } from "@/components/courses/CoursesPageContent";
 
 export default function CoursesPage() {
-  redirect("/programs");
+  return <CoursesPageContent />;
 }

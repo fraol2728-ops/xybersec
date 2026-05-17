@@ -3,9 +3,9 @@
 import { ArrowLeft, ArrowRight, BookText, NotebookPen } from "lucide-react";
 import Link from "next/link";
 import { AchievementTracker } from "@/components/achievements/AchievementTracker";
-import { CompleteButton } from "@/components/lesson/CompleteButton";
-import { LessonProgress } from "@/components/lesson/LessonProgress";
-import { LessonResources } from "@/components/lesson/LessonResources";
+import { CompleteButton } from "@/components/lessons/CompleteButton";
+import { LessonProgress } from "@/components/lessons/LessonProgress";
+import { LessonResources } from "@/components/lessons/LessonResources";
 import { Button } from "@/components/ui/button";
 import type { LESSON_BY_ID_QUERYResult } from "@/sanity.types";
 import { LessonContent } from "./LessonContent";
