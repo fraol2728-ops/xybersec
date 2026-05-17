@@ -12,7 +12,7 @@ export default clerkMiddleware(async (auth, req) => {
       return NextResponse.redirect(new URL("/sign-in", req.url));
     }
 
-    const role = sessionClaims?.publicMetadata?.role;
+    const role = (sessionClaims?.publicMetadata as { role?: string })?.role;
 
     if (role !== "admin") {
       return NextResponse.redirect(new URL("/dashboard?error=unauthorized", req.url));
