@@ -1,33 +1,60 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
+import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
-export async function saveOnboardingStep0(username: string, birthdate: Date) {
+export async function saveOnboardingStep0(username: string, birthdate: string) {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
 
+  const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
+  if (!usernameRegex.test(username)) {
+    return {
+      error:
+        "Username must be 3-20 characters, letters, numbers and underscores only",
+    };
+  }
+
   const existing = await prisma.userProfile.findUnique({
-    where: { username },
+    where: { username: username.toLowerCase() },
   });
-  if (existing) {
+  if (existing && existing.clerkId !== userId) {
     return { error: "Username already taken" };
   }
 
   await prisma.userProfile.upsert({
     where: { clerkId: userId },
-    update: { username, birthdate, onboardingStep: 1 },
+    update: {
+      username: username.toLowerCase(),
+      birthdate: new Date(birthdate),
+      onboardingStep: 1,
+    },
     create: {
       clerkId: userId,
-      username,
-      birthdate,
+      username: username.toLowerCase(),
+      birthdate: new Date(birthdate),
       onboardingStep: 1,
     },
   });
 
+  revalidatePath("/onboarding");
   return { success: true };
+}
+
+export async function checkUsernameAvailability(username: string) {
+  const { userId } = await auth();
+  if (!userId) return { available: false };
+  if (!username || username.length < 3) return { available: false };
+
+  const existing = await prisma.userProfile.findUnique({
+    where: { username: username.toLowerCase() },
+  });
+
+  if (!existing) return { available: true };
+  if (existing.clerkId === userId) return { available: true };
+  return { available: false };
 }
 
 export async function saveOnboardingStep1(howDidYouHear: string) {
@@ -39,13 +66,11 @@ export async function saveOnboardingStep1(howDidYouHear: string) {
     data: { howDidYouHear, onboardingStep: 2 },
   });
 
+  revalidatePath("/onboarding/step-1");
   return { success: true };
 }
 
-export async function saveOnboardingStep2(
-  currentRole: string,
-  educationLevel: string,
-) {
+export async function saveOnboardingStep2(currentRole: string, educationLevel: string) {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
 
@@ -54,6 +79,7 @@ export async function saveOnboardingStep2(
     data: { currentRole, educationLevel, onboardingStep: 3 },
   });
 
+  revalidatePath("/onboarding/step-2");
   return { success: true };
 }
 
@@ -63,27 +89,42 @@ export async function saveOnboardingStep3(learningGoals: string[]) {
 
   await prisma.userProfile.update({
     where: { clerkId: userId },
-    data: {
-      learningGoals,
-      onboardingStep: 4,
-      onboardingComplete: true,
-    },
+    data: { learningGoals, onboardingStep: 4, onboardingComplete: true },
   });
 
+  const { cookies } = await import("next/headers");
   const cookieStore = await cookies();
   cookieStore.set("onboarding_complete", "true", {
     httpOnly: true,
-    secure: true,
-    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 60 * 60 * 24 * 365,
     path: "/",
   });
 
+  revalidatePath("/onboarding/step-3");
   return { success: true };
 }
 
-export async function checkUsernameAvailability(username: string) {
-  const existing = await prisma.userProfile.findUnique({
-    where: { username },
+export async function getFirstFreeCourseSlug(): Promise<string | null> {
+  const { createClient } = await import("next-sanity");
+  const client = createClient({
+    projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
+    dataset: process.env.NEXT_PUBLIC_SANITY_DATASET!,
+    apiVersion: process.env.NEXT_PUBLIC_SANITY_API_VERSION ?? "2024-01-01",
+    useCdn: false,
   });
-  return { available: !existing };
+
+  const query = `*[_type == "course" && tier == "free"] | order(_createdAt asc) [0] {"slug": slug.current, title, "thumbnail": thumbnail.asset->url}`;
+  const result = await client.fetch(query);
+  return result?.slug ?? null;
+}
+
+export async function getOnboardingUsername() {
+  const { userId } = await auth();
+  if (!userId) return null;
+  const profile = await prisma.userProfile.findUnique({
+    where: { clerkId: userId },
+    select: { username: true },
+  });
+  return profile?.username ?? null;
 }

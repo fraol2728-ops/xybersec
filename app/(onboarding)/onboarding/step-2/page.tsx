@@ -1,40 +1,10 @@
 "use client";
-
-import Link from "next/link";
+import { Code, GraduationCap, Shield, Zap } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { saveOnboardingStep2 } from "@/lib/actions/onboarding";
-
-const roleOptions = ["Student", "IT Professional", "Software Developer", "Complete Beginner"];
-const educationOptions = ["High School", "Undergraduate", "Graduate / Postgrad", "Self-taught"];
-
-export default function Step2Page() {
-  const [role, setRole] = useState("");
-  const [education, setEducation] = useState("");
-  const [isPending, startTransition] = useTransition();
-  const router = useRouter();
-
-  return (
-    <div className="w-full rounded-2xl border border-border/70 bg-card/60 p-6 sm:p-10">
-      <h1 className="text-3xl font-bold sm:text-4xl">Tell us about yourself</h1>
-      <p className="mt-2 text-muted-foreground">Help us tailor your learning path</p>
-      <h2 className="mt-8 text-lg font-semibold">What best describes your current role?</h2>
-      <div className="mt-3 grid gap-3 sm:grid-cols-2">
-        {roleOptions.map((option) => (
-          <button key={option} onClick={() => setRole(option)} className={`rounded-xl border p-4 text-left ${role===option?"border-cyan-400 bg-cyan-500/10":"border-border hover:border-cyan-400/50"}`}>{option}</button>
-        ))}
-      </div>
-      <h2 className="mt-8 text-lg font-semibold">Your education level</h2>
-      <div className="mt-3 grid gap-3 sm:grid-cols-2">
-        {educationOptions.map((option) => (
-          <button key={option} onClick={() => setEducation(option)} className={`rounded-xl border p-4 text-left ${education===option?"border-cyan-400 bg-cyan-500/10":"border-border hover:border-cyan-400/50"}`}>{option}</button>
-        ))}
-      </div>
-      <div className="mt-8 flex items-center gap-4">
-        <Button disabled={!role || !education || isPending} onClick={() => startTransition(async () => { await saveOnboardingStep2(role, education); router.push('/onboarding/step-3');})}>Continue</Button>
-        <Link href="/onboarding/step-1" className="text-sm text-muted-foreground hover:text-foreground">Back</Link>
-      </div>
-    </div>
-  );
-}
+const roles=[{icon:GraduationCap,label:"Student",value:"student"},{icon:Shield,label:"IT Professional",value:"it_professional"},{icon:Code,label:"Software Developer",value:"developer"},{icon:Zap,label:"Complete Beginner",value:"beginner"}];
+const levels=[{label:"High School",value:"high_school"},{label:"Undergraduate",value:"undergraduate"},{label:"Graduate / Masters",value:"graduate"},{label:"Self-taught",value:"self_taught"}];
+export default function Page(){const [role,setRole]=useState("");const [education,setEducation]=useState("");const [isPending,startTransition]=useTransition();const router=useRouter();
+return <div className="w-full rounded-2xl border border-primary/20 bg-card/70 p-6 sm:p-8"><p className="text-sm text-muted-foreground">Step 3 of 4</p><h1 className="mt-2 text-3xl font-semibold">Tell us about yourself</h1><p className="mt-2 text-muted-foreground">This helps us recommend the right starting point</p><h2 className="mt-5 font-medium">What describes you best?</h2><div className="mt-3 grid grid-cols-2 gap-3">{roles.map((o)=>{const I=o.icon;const a=role===o.value;return <button key={o.value} onClick={()=>setRole(o.value)} className={`rounded-xl border p-4 text-left ${a?"border-primary bg-primary/10":"border-border"}`}><I className="h-5 w-5 text-primary"/><p className="mt-2">{o.label}</p></button>})}</div><h2 className="mt-5 font-medium">Your education level</h2><div className="mt-3 grid grid-cols-2 gap-3">{levels.map((o)=>{const a=education===o.value;return <button key={o.value} onClick={()=>setEducation(o.value)} className={`rounded-xl border p-4 text-left ${a?"border-primary bg-primary/10":"border-border"}`}>{o.label}</button>})}</div><Button className="mt-6 w-full bg-primary text-primary-foreground" disabled={!role||!education||isPending} onClick={()=>startTransition(async()=>{await saveOnboardingStep2(role,education);router.push('/onboarding/step-3');})}>Continue</Button></div>}

@@ -1,79 +1,55 @@
 "use client";
 
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Loader2, XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { saveOnboardingStep0, checkUsernameAvailability } from "@/lib/actions/onboarding";
 
-export default function OnboardingStep0Page() {
+export default function OnboardingPage() {
   const router = useRouter();
   const [username, setUsername] = useState("");
-  const [birthdate, setBirthdate] = useState("");
-  const [usernameStatus, setUsernameStatus] = useState<"idle" | "checking" | "valid" | "invalid" | "taken">("idle");
+  const [day, setDay] = useState("");
+  const [month, setMonth] = useState("");
+  const [year, setYear] = useState("");
+  const [status, setStatus] = useState<"idle"|"invalid"|"checking"|"taken"|"available">("idle");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const valid = useMemo(()=>/^[a-zA-Z0-9_]{3,20}$/.test(username),[username]);
 
-  const isUsernameFormatValid = useMemo(() => /^[a-zA-Z0-9_]{3,20}$/.test(username), [username]);
+  useEffect(()=>{
+    if (username.length < 3) return setStatus("idle");
+    if (!valid) return setStatus("invalid");
+    setStatus("checking");
+    const t = setTimeout(async ()=> {
+      const res = await checkUsernameAvailability(username);
+      setStatus(res.available ? "available" : "taken");
+    },500);
+    return ()=>clearTimeout(t);
+  },[username,valid]);
 
-  useEffect(() => {
-    if (!username) return setUsernameStatus("idle");
-    if (!isUsernameFormatValid) return setUsernameStatus("invalid");
+  const birthdate = year && month && day ? `${year}-${month.padStart(2,"0")}-${day.padStart(2,"0")}` : "";
+  const canContinue = status === "available" && !!birthdate;
+  const years = Array.from({length: 2010-1970+1},(_,i)=>String(2010-i));
 
-    setUsernameStatus("checking");
-    const timeout = setTimeout(async () => {
-      const result = await checkUsernameAvailability(username);
-      setUsernameStatus(result.available ? "valid" : "taken");
-    }, 350);
-
-    return () => clearTimeout(timeout);
-  }, [username, isUsernameFormatValid]);
-
-  const canSubmit = usernameStatus === "valid" && Boolean(birthdate);
-
-  const handleSubmit = () => {
-    setError(null);
-    startTransition(async () => {
-      const result = await saveOnboardingStep0(username, new Date(birthdate));
-      if (result?.error) return setError(result.error);
-      router.push("/onboarding/step-1");
-    });
-  };
-
-  return (
-    <div className="w-full rounded-2xl border border-border/70 bg-card/60 p-6 sm:p-10">
-      <h1 className="text-3xl font-bold text-foreground sm:text-4xl">Set up your profile</h1>
-      <p className="mt-2 text-muted-foreground">This takes less than 2 minutes</p>
-
-      <div className="mt-8 space-y-5">
-        <div>
-          <label className="mb-2 block text-sm text-muted-foreground">Choose a username</label>
-          <Input value={username} onChange={(e) => setUsername(e.target.value.trim())} placeholder="xyber_hacker" />
-          <p className="mt-2 text-sm text-muted-foreground">
-            {usernameStatus === "invalid" && "Use letters, numbers, or underscores (3-20 chars)."}
-            {usernameStatus === "checking" && "Checking username..."}
-            {usernameStatus === "taken" && "This username is already taken."}
-            {usernameStatus === "valid" && (
-              <span className="inline-flex items-center gap-1 text-emerald-400">
-                <CheckCircle2 className="h-4 w-4" /> Username is available
-              </span>
-            )}
-          </p>
-        </div>
-
-        <div>
-          <label className="mb-2 block text-sm text-muted-foreground">Birthdate</label>
-          <Input type="date" value={birthdate} onChange={(e) => setBirthdate(e.target.value)} />
+  return <div className="w-full rounded-2xl border border-primary/20 bg-card/70 p-6 transition-all duration-150 ease-in-out sm:p-8">
+    <p className="text-sm text-muted-foreground">Step 1 of 4</p>
+    <h1 className="mt-2 text-3xl font-semibold">Set up your profile</h1>
+    <p className="mt-2 text-muted-foreground">Choose how the world will know you on XyberSec</p>
+    <div className="mt-6 space-y-4">
+      <div><label className="mb-2 block text-sm">Username</label><Input value={username} placeholder="e.g. xhacker_eth" onChange={(e)=>setUsername(e.target.value.toLowerCase())} /></div>
+      <p className="text-sm">{status==="invalid"&&"Only letters, numbers and underscores"}{status==="checking"&&<span className="inline-flex items-center gap-1 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin"/>Checking...</span>}{status==="taken"&&<span className="inline-flex items-center gap-1 text-red-400"><XCircle className="h-4 w-4"/>Username taken</span>}{status==="available"&&<span className="inline-flex items-center gap-1 text-emerald-400"><CheckCircle2 className="h-4 w-4"/>Available</span>}</p>
+      <div>
+        <label className="mb-2 block text-sm">Date of birth</label>
+        <div className="grid grid-cols-3 gap-2">
+          <select className="rounded-md border border-border bg-background p-2" value={day} onChange={(e)=>setDay(e.target.value)}><option value="">Day</option>{Array.from({length:31},(_,i)=><option key={i+1} value={String(i+1)}>{i+1}</option>)}</select>
+          <select className="rounded-md border border-border bg-background p-2" value={month} onChange={(e)=>setMonth(e.target.value)}><option value="">Month</option>{Array.from({length:12},(_,i)=><option key={i+1} value={String(i+1)}>{i+1}</option>)}</select>
+          <select className="rounded-md border border-border bg-background p-2" value={year} onChange={(e)=>setYear(e.target.value)}><option value="">Year</option>{years.map((y)=><option key={y} value={y}>{y}</option>)}</select>
         </div>
       </div>
-
-      {error ? <p className="mt-3 text-sm text-destructive">{error}</p> : null}
-      <p className="mt-4 text-sm text-muted-foreground">You can change these later in settings</p>
-
-      <Button disabled={!canSubmit || isPending} onClick={handleSubmit} className="mt-8 w-full sm:w-auto">
-        Continue
-      </Button>
+      {error && <p className="text-sm text-red-400">{error}</p>}
+      <Button className="w-full bg-primary text-primary-foreground" disabled={!canContinue || isPending} onClick={()=>startTransition(async()=>{setError(null);const res=await saveOnboardingStep0(username,birthdate);if(res?.error){setError(res.error);return;}router.push('/onboarding/step-1');})}>{isPending?<Loader2 className="h-4 w-4 animate-spin"/>:"Continue"}</Button>
     </div>
-  );
+  </div>;
 }

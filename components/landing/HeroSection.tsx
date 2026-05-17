@@ -3,6 +3,8 @@
 import { motion } from "framer-motion";
 import { Rocket, ShieldCheck } from "lucide-react";
 import Link from "next/link";
+import { SignedIn, SignedOut } from "@clerk/nextjs";
+import { GetStartedButton } from "@/components/landing/GetStartedButton";
 import { Button } from "@/components/ui/button";
 import { glowTokenClass, heroGradientTokenClass } from "@/lib/theme";
 
@@ -66,11 +68,8 @@ export function HeroSection() {
           variants={itemVariants}
           className="mt-10 flex flex-col gap-4 sm:flex-row sm:justify-center"
         >
-          <Link href="/dashboard">
-            <Button className="h-11 w-full px-8 font-semibold sm:w-auto">
-              Start Learning
-            </Button>
-          </Link>
+          <SignedOut><Link href="/sign-up"><Button className="h-11 w-full px-8 font-semibold sm:w-auto">Start Learning</Button></Link></SignedOut>
+          <SignedIn><Button className="h-11 w-full px-8 font-semibold sm:w-auto"><GetStartedButton /></Button></SignedIn>
           <Link href="/#courses">
             <Button variant="outline" className="h-11 w-full px-8 sm:w-auto">
               Explore Courses
