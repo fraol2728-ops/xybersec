@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 
 export function Header() {
   const pathname = usePathname();
-  const { lang, setLang, isRTL } = useLanguage();
+  const { lang, isRTL } = useLanguage();
   const t = translations[lang];
 
   const navLinks = [
@@ -137,32 +137,7 @@ export function Header() {
           </div>
 
           <div className="hidden items-center gap-2 md:flex">
-            <div className="inline-flex rounded-lg border border-cyan-400/20 bg-[#0d1430]/70 p-0.5">
-              <button
-                type="button"
-                onClick={() => setLang("en")}
-                className={cn(
-                  "rounded-md px-2.5 py-1 text-xs font-semibold transition",
-                  lang === "en"
-                    ? "bg-cyan-400 text-[#02111b]"
-                    : "text-zinc-300 hover:text-cyan-200",
-                )}
-              >
-                EN
-              </button>
-              <button
-                type="button"
-                onClick={() => setLang("ar")}
-                className={cn(
-                  "rounded-md px-2.5 py-1 text-xs font-semibold transition",
-                  lang === "ar"
-                    ? "bg-cyan-400 text-[#02111b]"
-                    : "text-zinc-300 hover:text-cyan-200",
-                )}
-              >
-                AR
-              </button>
-            </div>
+            
 
             <button
               type="button"
@@ -236,32 +211,7 @@ export function Header() {
           )}
         >
           <div className="space-y-1 px-4 py-4">
-            <div className="mb-2 inline-flex rounded-lg border border-cyan-400/20 bg-[#0d1430]/70 p-0.5">
-              <button
-                type="button"
-                onClick={() => setLang("en")}
-                className={cn(
-                  "rounded-md px-2.5 py-1 text-xs font-semibold transition",
-                  lang === "en"
-                    ? "bg-cyan-400 text-[#02111b]"
-                    : "text-zinc-300 hover:text-cyan-200",
-                )}
-              >
-                EN
-              </button>
-              <button
-                type="button"
-                onClick={() => setLang("ar")}
-                className={cn(
-                  "rounded-md px-2.5 py-1 text-xs font-semibold transition",
-                  lang === "ar"
-                    ? "bg-cyan-400 text-[#02111b]"
-                    : "text-zinc-300 hover:text-cyan-200",
-                )}
-              >
-                AR
-              </button>
-            </div>
+            
             <button
               type="button"
               onClick={() => setCommandOpen(true)}
