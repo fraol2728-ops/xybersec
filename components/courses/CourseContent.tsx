@@ -13,9 +13,10 @@ import { ModuleAccordion } from "./ModuleAccordion";
 interface CourseContentProps {
   course: NonNullable<COURSE_WITH_MODULES_QUERYResult>;
   userId: string | null;
+  isEnrolled: boolean;
 }
 
-export function CourseContent({ course, userId }: CourseContentProps) {
+export function CourseContent({ course, userId, isEnrolled }: CourseContentProps) {
   const { isLoaded: isAuthLoaded } = useAuth();
   const userTier = useUserTier();
   const hasAccess = hasTierAccess(userTier, course.tier);
@@ -30,10 +31,13 @@ export function CourseContent({ course, userId }: CourseContentProps) {
   const progressPercent =
     totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
-  const firstLessonSlug = lessons[0]?.slug?.current;
-  const firstIncompleteLessonSlug = lessons.find((lesson) =>
+  const firstLessonSlug = (lessons[0]?.slug as any)?.current ?? (lessons[0]?.slug as any);
+  const firstIncompleteLesson = lessons.find((lesson) =>
     userId ? !lesson.completedBy?.includes(userId) : true,
-  )?.slug?.current;
+  );
+  const firstIncompleteLessonSlug =
+    (firstIncompleteLesson?.slug as any)?.current ??
+    (firstIncompleteLesson?.slug as any);
 
   const courseHref = `/courses/${course.slug?.current}`;
   const startHref = firstLessonSlug
@@ -78,7 +82,11 @@ export function CourseContent({ course, userId }: CourseContentProps) {
             />
           )}
 
-          <ModuleAccordion modules={course.modules ?? null} userId={userId} />
+          <ModuleAccordion
+            modules={course.modules ?? null}
+            userId={userId}
+            isEnrolled={isEnrolled}
+          />
         </div>
       ) : (
         <GatedFallback requiredTier={course.tier} />
