@@ -20,9 +20,10 @@ type Lesson = NonNullable<Module["lessons"]>[number];
 interface ModuleAccordionProps {
   modules: Module[] | null;
   userId?: string | null;
+  isEnrolled?: boolean;
 }
 
-export function ModuleAccordion({ modules, userId }: ModuleAccordionProps) {
+export function ModuleAccordion({ modules, userId, isEnrolled = false }: ModuleAccordionProps) {
   if (!modules?.length) {
     return (
       <div className="py-12 text-center text-zinc-500">
@@ -75,6 +76,17 @@ export function ModuleAccordion({ modules, userId }: ModuleAccordionProps) {
                         {completed}/{total} completed
                       </p>
                     </div>
+                    <div className="hidden items-center gap-2 sm:flex">
+                      {(module as any).isFree ? (
+                        <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+                          FREE
+                        </span>
+                      ) : !isEnrolled ? (
+                        <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-xs font-semibold text-muted-foreground">
+                          🔒 LOCKED
+                        </span>
+                      ) : null}
+                    </div>
                     <div className="hidden w-40 items-center gap-3 sm:flex">
                       <Progress
                         value={total ? (completed / total) * 100 : 0}
@@ -92,11 +104,32 @@ export function ModuleAccordion({ modules, userId }: ModuleAccordionProps) {
                     {module.lessons?.map((lesson) => {
                       const completedState = isLessonCompleted(lesson);
 
+                      const isLocked = !(module as any).isFree && !isEnrolled;
+                      const lessonClassName = `flex items-center gap-2.5 rounded-md px-2 py-2 text-sm text-zinc-300 transition ${
+                        isLocked ? "opacity-50" : "hover:bg-zinc-800/50"
+                      }`;
+
+                      if (isLocked) {
+                        return (
+                          <div key={lesson._id} className={lessonClassName}>
+                            {completedState ? (
+                              <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
+                            ) : (
+                              <Circle className="h-4 w-4 shrink-0 text-zinc-600" />
+                            )}
+                            <span className="flex-1">
+                              {lesson.title ?? "Untitled Lesson"}
+                            </span>
+                            <Play className="h-4 w-4 text-cyan-400" />
+                          </div>
+                        );
+                      }
+
                       return (
                         <Link
                           key={lesson._id}
-                          href={`/lessons/${lesson.slug?.current}`}
-                          className="flex items-center gap-2.5 rounded-md px-2 py-2 text-sm text-zinc-300 transition hover:bg-zinc-800/50"
+                          href={`/lessons/${lesson.slug}`}
+                          className={lessonClassName}
                         >
                           {completedState ? (
                             <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />

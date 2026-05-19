@@ -27,6 +27,15 @@ export const moduleType = defineType({
       ],
     }),
     defineField({
+      name: "isFree",
+      title: "Free Module",
+      type: "boolean",
+      group: "content",
+      description:
+        "Turn ON for Module 1 only. All lessons in this module will be accessible without payment.",
+      initialValue: false,
+    }),
+    defineField({
       name: "description",
       type: "text",
       group: "content",

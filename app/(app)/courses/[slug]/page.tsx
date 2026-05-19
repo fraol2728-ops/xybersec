@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { CourseContent } from "@/components/courses";
 import { StructuredData } from "@/components/seo/StructuredData";
 import { absoluteUrl, siteConfig } from "@/lib/seo";
+import { prisma } from "@/lib/prisma";
 import { sanityFetch } from "@/sanity/lib/live";
 import { COURSE_WITH_MODULES_QUERY } from "@/sanity/lib/queries";
 
@@ -82,6 +83,19 @@ export default async function CoursePage({ params }: CoursePageProps) {
     notFound();
   }
 
+  let isEnrolled = false;
+  if (userId) {
+    const profile = await prisma.userProfile.findUnique({
+      where: { clerkId: userId },
+      include: {
+        enrollments: {
+          where: { courseId: course._id },
+        },
+      },
+    });
+    isEnrolled = (profile?.enrollments?.length ?? 0) > 0;
+  }
+
   const courseSchema = {
     "@context": "https://schema.org",
     "@type": "Course",
@@ -154,7 +168,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
       />
 
       <main className="relative z-10 px-6 lg:px-12 py-12 max-w-7xl mx-auto">
-        <CourseContent course={course} userId={userId} />
+        <CourseContent course={course} userId={userId} isEnrolled={isEnrolled} />
       </main>
     </div>
   );
