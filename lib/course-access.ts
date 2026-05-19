@@ -1,43 +1,58 @@
 import { auth } from "@clerk/nextjs/server";
-import type { Tier } from "@/lib/constants";
+import { prisma } from "@/lib/prisma";
 
-/**
- * Check if the current user has access to content at the specified tier.
- * Uses Clerk's has() to check plan subscriptions.
- *
- * - Free content (or no tier specified): accessible to everyone
- * - Pro content: requires pro or ultra plan
- * - Ultra content: requires ultra plan
- */
-export async function hasAccessToTier(
-  requiredTier: Tier | null | undefined
-): Promise<boolean> {
-  // Free content or no tier = accessible to everyone
-  if (!requiredTier || requiredTier === "free") return true;
-  const { has } = await auth();
+export async function getUserCourseAccess(courseId: string) {
+  const { userId } = await auth();
 
-  console.log("requiredTier", requiredTier);
-  console.log("has ultra", has({ plan: "ultra" }));
-  console.log("has pro", has({ plan: "pro" }));
-  console.log("has free", has({ plan: "free" }));
-
-  // Ultra content requires ultra plan
-  if (requiredTier === "ultra") {
-    return has({ plan: "ultra" });
+  if (!userId) {
+    return {
+      isAuthenticated: false,
+      isEnrolled: false,
+      canAccessFreeContent: true,
+    };
   }
 
-  // Pro content requires pro OR ultra plan
-  if (requiredTier === "pro") {
-    return has({ plan: "pro" }) || has({ plan: "ultra" });
-  }
+  const profile = await prisma.userProfile.findUnique({
+    where: { clerkId: userId },
+    include: {
+      enrollments: {
+        where: { courseId },
+      },
+    },
+  });
 
-  return false;
+  const isEnrolled = (profile?.enrollments?.length ?? 0) > 0;
+
+  return {
+    isAuthenticated: true,
+    isEnrolled,
+    canAccessFreeContent: true,
+    profileId: profile?.id,
+  };
 }
 
-/**
- * Get the user's current subscription tier.
- */
-export async function getUserTier(): Promise<Tier> {
+export async function canUserAccessLesson(
+  courseId: string,
+  moduleIsFree: boolean,
+): Promise<boolean> {
+  if (moduleIsFree) return true;
+
+  const { userId } = await auth();
+  if (!userId) return false;
+
+  const profile = await prisma.userProfile.findUnique({
+    where: { clerkId: userId },
+    include: {
+      enrollments: {
+        where: { courseId },
+      },
+    },
+  });
+
+  return (profile?.enrollments?.length ?? 0) > 0;
+}
+
+export async function getUserTier(): Promise<"free" | "pro" | "ultra"> {
   const { has } = await auth();
 
   if (has({ plan: "ultra" })) return "ultra";
