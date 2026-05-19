@@ -1,6 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
+import { PaywallOverlay } from "@/components/courses/PaywallOverlay";
 import { LessonPageContent } from "@/components/lessons";
+import { canUserAccessLesson } from "@/lib/course-access";
 import { sanityFetch } from "@/sanity/lib/live";
 import { LESSON_BY_SLUG_QUERY } from "@/sanity/lib/queries";
 
@@ -18,6 +20,18 @@ export default async function LessonPage({ params }: LessonPageProps) {
 
   if (!lesson) {
     notFound();
+  }
+
+  const parentCourse = lesson.courses?.[0];
+  const parentModule = parentCourse?.modules?.find((module: any) =>
+    module.lessons?.some((item: any) => item._id === lesson._id),
+  );
+  const moduleIsFree = parentModule?.isFree ?? false;
+  const courseId = parentCourse?._id ?? "";
+  const canAccess = await canUserAccessLesson(courseId, moduleIsFree);
+
+  if (!canAccess) {
+    return <PaywallOverlay courseSlug={parentCourse?.slug?.current ?? "courses"} />;
   }
 
   return (

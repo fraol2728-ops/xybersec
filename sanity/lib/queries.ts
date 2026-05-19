@@ -1,4 +1,5 @@
 import { defineQuery } from "next-sanity";
+import { groq } from "next-sanity";
 
 export const FEATURED_COURSES_QUERY = defineQuery(`*[
   _type == "course"
@@ -191,11 +192,12 @@ export const COURSE_WITH_MODULES_QUERY = defineQuery(`*[
     _id,
     title,
     description,
+    isFree,
     completedBy,
     lessons[]-> {
       _id,
       title,
-      slug,
+      "slug": slug.current,
       description,
       completedBy,
       video {
@@ -321,9 +323,32 @@ export const LESSON_NAVIGATION_QUERY = defineQuery(`*[
   modules[]-> {
     _id,
     title,
+    isFree,
     lessons[]-> {
       _id,
       title
     }
   }
 }`);
+
+
+export const FIRST_FREE_COURSE_QUERY = groq`
+  *[_type == "course" && tier == "free"] 
+  | order(_createdAt asc) [0] {
+    _id,
+    title,
+    "slug": slug.current,
+    description,
+    tier,
+    modules[]->{
+      _id,
+      title,
+      isFree,
+      lessons[]->{
+        _id,
+        title,
+        "slug": slug.current
+      }
+    }
+  }
+`;
