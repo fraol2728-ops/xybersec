@@ -118,8 +118,10 @@ export default function Page() {
         disabled={selected.length < 1 || isPending}
         onClick={() =>
           startTransition(async () => {
-            await saveOnboardingStep3(selected);
-            router.push("/onboarding/welcome");
+            const result = await saveOnboardingStep3(selected);
+            if (result?.success) {
+              router.push("/onboarding/welcome");
+            }
           })
         }
       >
