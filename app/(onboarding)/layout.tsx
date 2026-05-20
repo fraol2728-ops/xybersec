@@ -16,7 +16,8 @@ export default async function OnboardingLayout({
     select: { onboardingComplete: true },
   });
 
-  if (profile?.onboardingComplete) redirect("/dashboard");
+  // REMOVED: onboardingComplete redirect from layout.
+  // Reason: this blocked /onboarding/welcome from rendering after step-3.
 
   return (
     <div className="dark min-h-screen bg-background text-foreground">
