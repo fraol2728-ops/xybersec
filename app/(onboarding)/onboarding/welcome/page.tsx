@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   getFirstFreeCourseSlug,
   getOnboardingUsername,
@@ -11,85 +11,117 @@ import {
 export default function WelcomePage() {
   const router = useRouter();
   const [username, setUsername] = useState("hacker");
-  const [slug, setSlug] = useState<string | null>(null);
-  const [countdown, setCountdown] = useState(4);
+  const [courseSlug, setCourseSlug] = useState<string | null>(null);
+  const [courseName, setCourseName] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [count, setCount] = useState(5);
+
+  const destination = useMemo(
+    () => (courseSlug ? `/courses/${courseSlug}` : "/dashboard"),
+    [courseSlug],
+  );
 
   useEffect(() => {
     (async () => {
-      setUsername((await getOnboardingUsername()) ?? "hacker");
-      setSlug(await getFirstFreeCourseSlug());
+      const [name, course] = await Promise.all([
+        getOnboardingUsername(),
+        getFirstFreeCourseSlug(),
+      ]);
+      setUsername(name ?? "hacker");
+      setCourseSlug(course?.slug ?? null);
+      setCourseName(course?.title ?? null);
+      setLoading(false);
     })();
   }, []);
 
   useEffect(() => {
-    const i = setInterval(() => setCountdown((c) => Math.max(0, c - 1)), 1000);
-    const t = setTimeout(
-      () => router.push(slug ? `/courses/${slug}` : "/dashboard"),
-      4000,
+    if (loading) return;
+
+    const interval = setInterval(() => {
+      setCount((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          router.push(destination);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [destination, loading, router]);
+
+  const handleBegin = () => {
+    router.push(destination);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
     );
-    return () => {
-      clearInterval(i);
-      clearTimeout(t);
-    };
-  }, [router, slug]);
+  }
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-background px-4">
-      <div className="pointer-events-none absolute left-1/4 top-1/4 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-secondary/10 blur-3xl" />
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4 relative overflow-hidden">
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/10 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="relative z-10 flex w-full max-w-sm flex-col items-center">
-        <Image
+      <div className="relative z-10 text-center">
+        <style>{`
+          @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+          }
+          .fade-up { animation: fadeUp 0.6s ease forwards; opacity: 0; }
+          .d1 { animation-delay: 0.1s; }
+          .d2 { animation-delay: 0.4s; }
+          .d3 { animation-delay: 0.7s; }
+          .d4 { animation-delay: 1.0s; }
+          .d5 { animation-delay: 1.3s; }
+        `}</style>
+
+        {/* biome-ignore lint/performance/noImgElement: required by onboarding welcome design spec */}
+        <img
           src="/logo.png"
-          width={72}
-          height={72}
+          className="w-16 h-16 mx-auto mb-6 drop-shadow-[0_0_24px_rgba(34,211,238,0.5)] fade-up d1"
           alt="XyberSec"
-          className="fade-up delay-1 mb-6 drop-shadow-[0_0_24px_rgba(34,211,238,0.4)]"
-          priority
         />
-        <p className="fade-up delay-2 mb-3 text-center text-sm font-medium uppercase tracking-widest text-primary">
+
+        <p className="fade-up d2 text-primary text-sm font-semibold tracking-widest uppercase mb-4">
           Welcome to XyberSec Academy
         </p>
-        <h1 className="fade-up delay-3 mb-4 text-center text-5xl font-bold text-foreground">
+
+        <h1 className="fade-up d3 text-5xl font-bold text-foreground mb-4">
           @{username}
         </h1>
-        <p className="fade-up delay-4 mb-10 max-w-sm text-center text-lg text-muted-foreground">
+
+        <p className="fade-up d4 text-muted-foreground text-lg max-w-sm mx-auto mb-10">
           Your cybersecurity journey starts now. Ethiopia&apos;s #1 security
           academy.
         </p>
 
-        <div className="fade-up delay-5 mb-8 w-full max-w-sm rounded-xl border border-border bg-muted p-4 text-left">
-          <p className="mb-1 text-xs text-muted-foreground">Starting with</p>
-          <p className="font-semibold text-foreground">
-            Your first free course
+        <div className="fade-up d5 bg-muted border border-border rounded-xl p-4 max-w-xs w-full mx-auto mb-8 text-left">
+          <p className="text-xs text-muted-foreground mb-1">Starting with</p>
+          <p className="text-foreground font-semibold text-sm">
+            {courseName ?? "Cybersecurity Fundamentals"}
           </p>
-          <p className="mt-1 text-xs text-primary">Free • Beginner friendly</p>
+          <p className="text-xs text-primary mt-1">Free • Beginner friendly</p>
         </div>
 
         <button
           type="button"
-          onClick={() => router.push(slug ? `/courses/${slug}` : "/dashboard")}
-          className="fade-up delay-5 rounded-xl bg-primary px-8 py-4 text-sm font-semibold text-background transition-all duration-200 hover:opacity-90 hover:shadow-xl hover:shadow-primary/30"
+          onClick={handleBegin}
+          className="fade-up d5 px-8 py-4 bg-primary text-background font-semibold rounded-xl hover:opacity-90 hover:shadow-xl hover:shadow-primary/30 transition-all duration-200 text-sm mb-4"
         >
           Begin Your Journey →
         </button>
-        <p className="fade-up delay-5 mt-6 text-sm text-muted-foreground">
-          Starting automatically in {countdown}s...
+
+        <p className="fade-up d5 text-muted-foreground text-sm">
+          Starting automatically in {count}s...
         </p>
       </div>
-
-      <style jsx>{`
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .fade-up { animation: fadeUp 0.6s ease forwards; opacity: 0; }
-        .delay-1 { animation-delay: 0.2s; }
-        .delay-2 { animation-delay: 0.5s; }
-        .delay-3 { animation-delay: 0.8s; }
-        .delay-4 { animation-delay: 1.1s; }
-        .delay-5 { animation-delay: 1.4s; }
-      `}</style>
     </div>
   );
 }

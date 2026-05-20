@@ -1,9 +1,9 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/prisma";
-import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
 
 export async function saveOnboardingStep0(username: string, birthdate: string) {
   const { userId } = await auth();
@@ -70,7 +70,10 @@ export async function saveOnboardingStep1(howDidYouHear: string) {
   return { success: true };
 }
 
-export async function saveOnboardingStep2(currentRole: string, educationLevel: string) {
+export async function saveOnboardingStep2(
+  currentRole: string,
+  educationLevel: string,
+) {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
 
@@ -105,18 +108,31 @@ export async function saveOnboardingStep3(learningGoals: string[]) {
   return { success: true };
 }
 
-export async function getFirstFreeCourseSlug(): Promise<string | null> {
+export async function getFirstFreeCourseSlug() {
   const { createClient } = await import("next-sanity");
+
+  const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID ?? "";
+  const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET ?? "";
+
   const client = createClient({
-    projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
-    dataset: process.env.NEXT_PUBLIC_SANITY_DATASET!,
+    projectId,
+    dataset,
     apiVersion: process.env.NEXT_PUBLIC_SANITY_API_VERSION ?? "2024-01-01",
     useCdn: false,
   });
 
-  const query = `*[_type == "course" && tier == "free"] | order(_createdAt asc) [0] {"slug": slug.current, title, "thumbnail": thumbnail.asset->url}`;
-  const result = await client.fetch(query);
-  return result?.slug ?? null;
+  const result = await client.fetch(
+    `*[_type == "course" && tier == "free"]
+    | order(_createdAt asc) [0] {
+      "slug": slug.current,
+      title
+    }`,
+  );
+
+  return {
+    slug: result?.slug ?? null,
+    title: result?.title ?? null,
+  };
 }
 
 export async function getOnboardingUsername() {

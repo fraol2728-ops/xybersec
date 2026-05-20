@@ -19,7 +19,9 @@ export default clerkMiddleware(async (auth, req) => {
     const role = (sessionClaims?.publicMetadata as { role?: string })?.role;
 
     if (role !== "admin") {
-      return NextResponse.redirect(new URL("/dashboard?error=unauthorized", req.url));
+      return NextResponse.redirect(
+        new URL("/dashboard?error=unauthorized", req.url),
+      );
     }
 
     return;
@@ -34,7 +36,21 @@ export default clerkMiddleware(async (auth, req) => {
   const pathname = req.nextUrl.pathname;
   const onboardingComplete = req.cookies.get("onboarding_complete")?.value;
 
-  if (!onboardingComplete && isLoggedIn && pathname === "/dashboard") {
+  const isOnboardingFlowPath = [
+    "/onboarding/welcome",
+    "/onboarding/step-1",
+    "/onboarding/step-2",
+    "/onboarding/step-3",
+  ].includes(pathname);
+  const isCoursePath = pathname.startsWith("/courses/");
+
+  if (
+    !onboardingComplete &&
+    isLoggedIn &&
+    pathname === "/dashboard" &&
+    !isOnboardingFlowPath &&
+    !isCoursePath
+  ) {
     return NextResponse.redirect(new URL("/onboarding", req.url));
   }
 });
