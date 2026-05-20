@@ -13,12 +13,18 @@ export default function WelcomePage() {
   const [username, setUsername] = useState("hacker");
   const [courseSlug, setCourseSlug] = useState<string | null>(null);
   const [courseName, setCourseName] = useState<string | null>(null);
+  const [firstLessonSlug, setFirstLessonSlug] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [count, setCount] = useState(5);
 
   const destination = useMemo(
-    () => (courseSlug ? `/courses/${courseSlug}` : "/dashboard"),
-    [courseSlug],
+    () =>
+      firstLessonSlug
+        ? `/lessons/${firstLessonSlug}`
+        : courseSlug
+          ? `/courses/${courseSlug}`
+          : "/dashboard",
+    [courseSlug, firstLessonSlug],
   );
 
   useEffect(() => {
@@ -27,9 +33,15 @@ export default function WelcomePage() {
         getOnboardingUsername(),
         getFirstFreeCourseSlug(),
       ]);
+      const { slug, title, firstLessonSlug } = course ?? {
+        slug: null,
+        title: null,
+        firstLessonSlug: null,
+      };
       setUsername(name ?? "hacker");
-      setCourseSlug(course?.slug ?? null);
-      setCourseName(course?.title ?? null);
+      setCourseSlug(slug);
+      setCourseName(title);
+      setFirstLessonSlug(firstLessonSlug);
       setLoading(false);
     })();
   }, []);

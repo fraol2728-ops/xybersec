@@ -125,13 +125,15 @@ export async function getFirstFreeCourseSlug() {
     `*[_type == "course" && tier == "free"]
     | order(_createdAt asc) [0] {
       "slug": slug.current,
-      title
+      title,
+      "firstLessonSlug": modules[0]->.lessons[0]->.slug.current
     }`,
   );
 
   return {
     slug: result?.slug ?? null,
     title: result?.title ?? null,
+    firstLessonSlug: result?.firstLessonSlug ?? null,
   };
 }
 
