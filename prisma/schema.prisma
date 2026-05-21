@@ -27,6 +27,10 @@ model UserProfile {
   avatarUrl          String?
   bio                String?
   country            String?          @default("Ethiopia")
+  xpPoints           Int              @default(0)
+  currentStreak      Int              @default(0)
+  longestStreak      Int              @default(0)
+  lastActivityAt     DateTime?
 
   // Timestamps
   createdAt          DateTime         @default(now())
@@ -68,6 +72,7 @@ model LessonProgress {
 
   completed   Boolean     @default(false)
   completedAt DateTime?
+  xpEarned    Int         @default(0)
 
   user        UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
 
