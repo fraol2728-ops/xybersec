@@ -293,6 +293,9 @@ export const LESSON_BY_SLUG_QUERY = defineQuery(`*[
     url
   },
   completedBy,
+  "moduleIsFree": *[_type == "module" && references(^._id)][0].isFree,
+  "courseId": *[_type == "course" && references(*[_type == "module" && references(^._id)][0]._id)][0]._id,
+  "courseSlug": *[_type == "course" && references(*[_type == "module" && references(^._id)][0]._id)][0].slug.current,
   "courses": *[_type == "course" && ^._id in modules[]->lessons[]->_id] | order(
     select(tier == "free" => 0, tier == "pro" => 1, tier == "ultra" => 2)
   ) {

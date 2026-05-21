@@ -22,16 +22,13 @@ export default async function LessonPage({ params }: LessonPageProps) {
     notFound();
   }
 
-  const parentCourse = lesson.courses?.[0];
-  const parentModule = parentCourse?.modules?.find((module: any) =>
-    module.lessons?.some((item: any) => item._id === lesson._id),
-  );
-  const moduleIsFree = parentModule?.isFree ?? false;
-  const courseId = parentCourse?._id ?? "";
+  const moduleIsFree = lesson?.moduleIsFree ?? false;
+  const courseId = lesson?.courseId ?? "";
+  const courseSlug = lesson?.courseSlug ?? "";
   const canAccess = await canUserAccessLesson(courseId, moduleIsFree);
 
   if (!canAccess) {
-    return <PaywallOverlay courseSlug={parentCourse?.slug?.current ?? "courses"} />;
+    return <PaywallOverlay courseSlug={courseSlug} />;
   }
 
   return (
