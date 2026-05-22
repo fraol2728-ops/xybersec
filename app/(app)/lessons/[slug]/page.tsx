@@ -1,11 +1,9 @@
 import { auth } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
 import { PaywallOverlay } from "@/components/courses/PaywallOverlay";
-import { AITutorCard } from "@/components/lessons/AITutorCard";
 import { LessonMainContent } from "@/components/lessons/LessonMainContent";
+import { LessonRightPanel } from "@/components/lessons/LessonRightPanel";
 import { LessonTopBar } from "@/components/lessons/LessonTopBar";
-import { ProgressCard } from "@/components/lessons/ProgressCard";
-import { XPStreakCard } from "@/components/lessons/XPStreakCard";
 import { canUserAccessLesson } from "@/lib/course-access";
 import { getLessonProgress } from "@/lib/actions/xp";
 import { sanityFetch } from "@/sanity/lib/live";
@@ -30,15 +28,20 @@ export default async function LessonPage({ params }: LessonPageProps) {
 
   return (
     <div data-lesson-page="true" className="dark min-h-screen bg-background text-foreground">
-      <LessonTopBar lessonTitle={lesson.title ?? "Lesson"} courseTitle={lesson.courses?.[0]?.title ?? "Course"} moduleIsFree={moduleIsFree} />
-      <div className="flex h-[calc(100vh-52px)] pt-[52px]">
+      <LessonTopBar lessonTitle={lesson.title ?? ""} moduleIsFree={lesson.moduleIsFree ?? false} />
+      <div className="flex h-[calc(100vh-56px)] pt-[56px]">
         <main className="flex-1 overflow-y-auto">
           <LessonMainContent lesson={lesson} userId={userId} moduleIsFree={moduleIsFree} />
         </main>
-        <aside className="w-80 border-l border-border overflow-y-auto flex-shrink-0 hidden lg:flex flex-col gap-4 p-4">
-          <ProgressCard lessonId={lesson._id} courseId={lesson.courseId} lessonSlug={lesson.slug?.current ?? ""} initialData={progressData} />
-          <XPStreakCard initialData={progressData} />
-          <AITutorCard lessonTitle={lesson.title ?? "Lesson"} lessonDescription={lesson.description ?? undefined} />
+        <aside className="lesson-panel-aside w-80 border-l border-border overflow-y-auto flex-shrink-0 hidden lg:flex flex-col relative">
+          <LessonRightPanel
+            lessonId={lesson._id}
+            lessonTitle={lesson.title ?? ""}
+            lessonDescription={lesson.description}
+            courseId={lesson.courseId ?? ""}
+            lessonSlug={lesson.slug?.current ?? ""}
+            initialProgress={progressData}
+          />
         </aside>
       </div>
     </div>
