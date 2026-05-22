@@ -1,55 +1,33 @@
-"use client";
-
-import { motion } from "framer-motion";
-import { useLanguage } from "@/context/language";
-import { translations } from "@/lib/translations";
-import { cn } from "@/lib/utils";
-import { AnimatedSection, staggerContainer } from "./animations";
+const steps = [
+  { step: "01", icon: "🎓", title: "Sign Up Free", description: "Create your account in 2 minutes. Complete a quick profile so we can personalize your learning path. No credit card needed.", highlight: "Takes 2 minutes" },
+  { step: "02", icon: "🛡️", title: "Learn the Fundamentals", description: "Start with Module 1 completely free. Real cybersecurity content, AI tutor support, and hands-on exercises. No fluff.", highlight: "Always free" },
+  { step: "03", icon: "🏆", title: "Get Certified & Get Hired", description: "Unlock full access for ETB 299/month. Complete all modules, pass the final assessment, and earn your XyberSec certificate.", highlight: "ETB 299/month" },
+]
 
 export function HowItWorks() {
-  const { lang } = useLanguage();
-  const t = translations[lang];
-  const steps = [t.step1, t.step2, t.step3];
-
   return (
-    <AnimatedSection
-      className={cn(
-        "mx-auto max-w-7xl px-6 py-20 lg:px-12",
-        lang === "ar" ? "text-right" : "text-left",
-      )}
-    >
-      <div className="mb-10">
-        <p className="text-sm uppercase tracking-[0.3em] text-cyan-300/80">
-          {t.howItWorks}
-        </p>
-        <h2 className="mt-3 text-3xl font-bold text-white sm:text-4xl">
-          {t.howItWorksTitle}
-        </h2>
-      </div>
-
-      <motion.div
-        className="grid gap-5 md:grid-cols-3"
-        variants={staggerContainer}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.2 }}
-      >
-        {steps.map((step, index) => (
-          <motion.div
-            key={step}
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.4 }}
-            transition={{ duration: 0.5, delay: index * 0.08 }}
-            className="rounded-2xl border border-cyan-400/20 bg-[#081127]/65 p-6"
-          >
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-500/20 text-lg font-bold text-cyan-200">
-              {index + 1}
+    <section className="py-20 px-4 sm:px-6 lg:px-12 bg-muted/20">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-12">
+          <p className="text-primary text-sm font-semibold tracking-wider uppercase mb-3">THE PROCESS</p>
+          <h2 className="text-3xl font-bold text-foreground mb-4">From Zero to Certified in 3 Steps</h2>
+          <p className="text-muted-foreground max-w-xl mx-auto">A clear path from complete beginner to job-ready cybersecurity professional.</p>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {steps.map((step, idx) => (
+            <div key={step.step} className="relative">
+              <div className="relative flex flex-col p-6 rounded-2xl border border-border bg-background hover:border-primary/30 transition-colors h-full">
+                <span className="text-6xl font-black text-border absolute top-4 right-5 select-none">{step.step}</span>
+                <span className="text-3xl mb-4">{step.icon}</span>
+                <h3 className="text-lg font-semibold text-foreground mb-2">{step.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4 flex-1">{step.description}</p>
+                <span className="self-start text-xs font-semibold text-primary bg-primary/10 border border-primary/20 px-3 py-1 rounded-full">{step.highlight}</span>
+              </div>
+              {idx < steps.length - 1 ? <div className="hidden lg:block absolute -right-4 top-1/2 text-muted-foreground">→</div> : null}
             </div>
-            <p className="mt-5 text-lg font-medium text-white">{step}</p>
-          </motion.div>
-        ))}
-      </motion.div>
-    </AnimatedSection>
-  );
+          ))}
+        </div>
+      </div>
+    </section>
+  )
 }

@@ -1,234 +1,100 @@
-"use client";
+"use client"
 
-import { motion, type Variants } from "framer-motion";
-import { Rocket, ShieldCheck } from "lucide-react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { useLanguage } from "@/context/language";
-import { translations } from "@/lib/translations";
-import { cn } from "@/lib/utils";
+import { SignedIn, SignedOut } from "@clerk/nextjs"
+import Link from "next/link"
+import { useEffect, useState } from "react"
 
-type HeroCourse = {
-  _id: string;
-  title: string | null;
-  description: string | null;
-  slug: {
-    current?: string;
-  } | null;
-};
+const terminalLines = [
+  { delay: 0, color: "text-muted-foreground", text: "$ xybersec --initialize" },
+  { delay: 800, color: "text-primary", text: "✓ Loading cybersecurity fundamentals..." },
+  { delay: 1600, color: "text-primary", text: "✓ AI tutor initialized..." },
+  { delay: 2400, color: "text-primary", text: "✓ Setting up lab environment..." },
+  { delay: 3200, color: "text-secondary", text: "✓ 3 courses available" },
+  { delay: 4000, color: "text-secondary", text: "✓ Community: 50+ students" },
+  { delay: 4800, color: "text-foreground", text: "→ Welcome to XyberSec Academy 🛡️" },
+  { delay: 5600, color: "text-primary", text: "$ _" },
+]
 
-type HeroProps = {
-  courses: HeroCourse[];
-};
+export function Hero() {
+  const [visibleCount, setVisibleCount] = useState(0)
 
-const heroContainer: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.12,
-      delayChildren: 0.08,
-    },
-  },
-};
+  useEffect(() => {
+    const timers = terminalLines.map((line, index) =>
+      setTimeout(() => setVisibleCount(index + 1), line.delay),
+    )
 
-const fadeUpSoft: Variants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.55, ease: "easeOut" },
-  },
-};
-
-const fadeIn: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { duration: 0.5, ease: "easeOut" },
-  },
-};
-
-const companiesReveal: Variants = {
-  hidden: { opacity: 0, scale: 0.95 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: { duration: 0.6, ease: "easeOut" },
-  },
-};
-
-const trustedCompanies = [
-  { name: "Google", emblem: "G", emblemClass: "bg-blue-500/25 text-blue-100" },
-  {
-    name: "Microsoft",
-    emblem: "MS",
-    emblemClass: "bg-cyan-500/25 text-cyan-100",
-  },
-  {
-    name: "Amazon",
-    emblem: "a",
-    emblemClass: "bg-orange-500/25 text-orange-100",
-  },
-  { name: "Cisco", emblem: "Ci", emblemClass: "bg-sky-500/25 text-sky-100" },
-  {
-    name: "IBM",
-    emblem: "IBM",
-    emblemClass: "bg-indigo-500/25 text-indigo-100",
-  },
-  {
-    name: "Cloudflare",
-    emblem: "Cf",
-    emblemClass: "bg-amber-500/25 text-amber-100",
-  },
-  {
-    name: "NVIDIA",
-    emblem: "NV",
-    emblemClass: "bg-emerald-500/25 text-emerald-100",
-  },
-  {
-    name: "Palo Alto Networks",
-    emblem: "PA",
-    emblemClass: "bg-fuchsia-500/25 text-fuchsia-100",
-  },
-];
-
-export function Hero({ courses: _courses }: HeroProps) {
-  const { lang } = useLanguage();
-  const t = translations[lang];
+    return () => timers.forEach((timer) => clearTimeout(timer))
+  }, [])
 
   return (
-    <section
-      id="hero"
-      className={cn(
-        "relative flex min-h-screen items-center justify-center overflow-hidden border-b border-cyan-400/10 px-6 lg:px-12",
-        lang === "ar" ? "text-right" : "text-center",
-      )}
-    >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(34,211,238,0.22),transparent_40%),radial-gradient(circle_at_85%_0%,rgba(59,130,246,0.26),transparent_45%),linear-gradient(to_bottom,#040711,#050816)]" />
-      <div
-        className="absolute inset-0 opacity-30"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(34,211,238,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(34,211,238,0.08) 1px, transparent 1px)",
-          backgroundSize: "42px 42px",
-        }}
-      />
+    <section className="relative min-h-screen flex items-center px-4 sm:px-6 lg:px-12 py-24 overflow-hidden">
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/8 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary/8 rounded-full blur-3xl pointer-events-none" />
 
-      <motion.div
-        className="pointer-events-none absolute right-16 top-30 hidden lg:block"
-        animate={{ y: [0, -12, 0] }}
-        transition={{
-          duration: 4,
-          repeat: Number.POSITIVE_INFINITY,
-          ease: "easeInOut",
-        }}
-      >
-        <Rocket className="h-20 w-20 text-cyan-300/90" />
-      </motion.div>
-
-      <motion.div
-        className="pointer-events-none absolute bottom-16 left-12 hidden lg:block"
-        animate={{ y: [0, 10, 0] }}
-        transition={{
-          duration: 3.6,
-          repeat: Number.POSITIVE_INFINITY,
-          ease: "easeInOut",
-          delay: 0.4,
-        }}
-      >
-        <Rocket className="h-8 w-8 text-cyan-300/75" />
-      </motion.div>
-
-      <motion.div
-        className="relative mx-auto flex w-full max-w-5xl flex-col items-center justify-center gap-7 py-16 sm:gap-8"
-        variants={heroContainer}
-        initial="hidden"
-        animate="visible"
-      >
-        <motion.div
-          variants={fadeUpSoft}
-          className="mx-auto inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-4 py-2 text-xs uppercase tracking-[0.24em] text-cyan-100"
-        >
-          <ShieldCheck className="h-4 w-4" />
-          {t.heroBadge}
-        </motion.div>
-
-        <motion.h1
-          variants={fadeUpSoft}
-          className="text-balance text-5xl font-light leading-[1.05] text-white sm:text-6xl lg:text-7xl"
-        >
-          {t.heroTitle}
-        </motion.h1>
-
-        <motion.p
-          variants={fadeIn}
-          className="max-w-3xl text-base leading-relaxed text-zinc-300/90 sm:text-xl"
-        >
-          {t.heroSubtitle}
-        </motion.p>
-
-        <motion.div
-          variants={fadeIn}
-          className="flex flex-col gap-4 sm:flex-row sm:justify-center"
-        >
-          <Link href="/ai">
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button className="h-11 w-full bg-cyan-400 px-8 font-semibold text-[#041018] hover:bg-cyan-300 sm:w-auto">
-                {t.chatWithAi}
-              </Button>
-            </motion.div>
-          </Link>
-          <Link href="/courses">
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button
-                variant="outline"
-                className="h-11 w-full border-cyan-400/40 bg-[#081127]/70 px-8 text-cyan-100 hover:bg-cyan-400/10 sm:w-auto"
-              >
-                {t.exploreServices}
-              </Button>
-            </motion.div>
-          </Link>
-        </motion.div>
-
-        <motion.div
-          variants={companiesReveal}
-          className="w-full rounded-2xl border border-white/10 bg-white/5 p-4 shadow-[0_0_0_rgba(56,189,248,0)] backdrop-blur-xl sm:p-5"
-        >
-          <p className="mb-4 text-sm uppercase tracking-[0.2em] text-cyan-100/80">
-            {t.trustedBy}
-          </p>
-          <div className="overflow-hidden [mask-image:linear-gradient(to_right,transparent,white_10%,white_90%,transparent)]">
-            <motion.div
-              className="flex w-max gap-3"
-              animate={{ x: ["0%", "-50%"] }}
-              transition={{
-                duration: 28,
-                ease: "linear",
-                repeat: Number.POSITIVE_INFINITY,
-              }}
-            >
-              {[...trustedCompanies, ...trustedCompanies].map(
-                (company, index) => (
-                  <div
-                    key={`${company.name}-${index}`}
-                    className="flex min-w-[190px] items-center gap-3 rounded-xl border border-white/10 bg-[#050a18]/80 px-4 py-3"
-                  >
-                    <span
-                      className={`inline-flex h-8 min-w-8 items-center justify-center rounded-md px-1 text-xs font-semibold uppercase tracking-wide ${company.emblemClass}`}
-                    >
-                      {company.emblem}
-                    </span>
-                    <span className="text-sm text-zinc-200">
-                      {company.name}
-                    </span>
-                  </div>
-                ),
-              )}
-            </motion.div>
+      <div className="relative z-10 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/30 bg-primary/5 mb-6">
+            <span className="text-sm">🇪🇹</span>
+            <span className="text-xs font-semibold text-primary tracking-wide">Ethiopia&apos;s #1 Cybersecurity Academy</span>
           </div>
-        </motion.div>
-      </motion.div>
+
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-4">
+            Learn Ethical <span className="text-primary">Hacking.</span>
+            <br />
+            Get Certified. <span className="text-secondary">Get Hired.</span>
+          </h1>
+
+          <p className="text-muted-foreground text-lg leading-relaxed mb-8 max-w-lg">
+            Master penetration testing, network security, and ethical hacking with hands-on labs and an AI tutor — in English and Amharic. Built for Ethiopia.
+          </p>
+
+          <div className="flex flex-wrap gap-3 mb-8">
+            <SignedOut>
+              <Link href="/sign-up" className="px-6 py-3 rounded-xl bg-primary text-background font-semibold text-sm hover:opacity-90 hover:shadow-xl hover:shadow-primary/25 transition-all">
+                Start Learning Free →
+              </Link>
+              <Link href="/courses" className="px-6 py-3 rounded-xl border border-border text-muted-foreground text-sm hover:border-primary/50 hover:text-foreground transition-all">
+                View Courses
+              </Link>
+            </SignedOut>
+            <SignedIn>
+              <Link href="/dashboard" className="px-6 py-3 rounded-xl bg-primary text-background font-semibold text-sm hover:opacity-90 transition-all">
+                Continue Learning →
+              </Link>
+            </SignedIn>
+          </div>
+
+          <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+            {[
+              "No credit card required",
+              "First module always free",
+              "ETB 299/month full access",
+            ].map((item) => (
+              <span key={item} className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                {item}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="relative rounded-2xl border border-border bg-muted overflow-hidden">
+          <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-background/50">
+            <div className="w-3 h-3 rounded-full bg-red-500/70" />
+            <div className="w-3 h-3 rounded-full bg-yellow-500/70" />
+            <div className="w-3 h-3 rounded-full bg-green-500/70" />
+            <span className="ml-2 text-xs text-muted-foreground font-mono">xybersec@academy:~</span>
+          </div>
+          <div className="p-5 font-mono text-sm min-h-[220px]">
+            {terminalLines.slice(0, visibleCount).map((line, i) => (
+              <div key={i} className={`${line.color} mb-1 transition-opacity duration-300 ${line.text === "$ _" ? "animate-pulse" : ""}`}>
+                {line.text}
+              </div>
+            ))}
+          </div>
+          <div className="absolute -inset-1 bg-primary/5 rounded-2xl blur-xl -z-10" />
+        </div>
+      </div>
     </section>
-  );
+  )
 }

@@ -25,21 +25,17 @@ export function Header() {
 
   const navLinks = [
     { href: "/", label: t.navHome },
-    { href: "/programs", label: t.navPrograms },
-    { href: "/pricin", label: t.navPricing },
-    { href: "/docs", label: t.navDocs },
+    { href: "/courses", label: "Courses" },
+    { href: "/pricing", label: t.navPricing },
     { href: "/community", label: t.navCommunity },
-    { href: "/ai", label: t.navAiLab, isNew: true },
   ];
 
   const commandPaletteLinks = [
     { href: "/", label: t.navHome },
     { href: "/dashboard", label: t.navDashboard },
-    { href: "/dashboard/courses", label: t.navMyCourses },
-    { href: "/pricin", label: t.navPricing },
-    { href: "/docs", label: t.navDocs },
+    { href: "/courses", label: "Courses" },
+    { href: "/pricing", label: t.navPricing },
     { href: "/community", label: t.navCommunity },
-    { href: "/ai", label: t.navAiLab, isNew: true },
     { href: "/notes", label: t.navNotes },
   ];
 
@@ -125,13 +121,10 @@ export function Header() {
                 label={link.label}
                 isScrolled={isScrolled}
                 isActive={
-                  link.href === "/programs"
-                    ? pathname === "/programs" ||
-                      pathname.startsWith("/programs/")
+                  link.href === "/courses"
+                    ? pathname === "/courses" || pathname.startsWith("/courses/")
                     : pathname === link.href
                 }
-                isNew={link.isNew}
-                newLabel={t.newLabel}
               />
             ))}
           </div>
@@ -225,21 +218,12 @@ export function Header() {
               label={t.navHome}
               isActive={pathname === "/"}
             />
-            <MobileNavLink
-              href="/programs"
-              label={t.navPrograms}
-              isActive={
-                pathname === "/programs" || pathname.startsWith("/programs/")
-              }
-            />
-            {navLinks.slice(2).map((link) => (
+            {navLinks.slice(1).map((link) => (
               <MobileNavLink
                 key={link.label}
                 href={link.href}
                 label={link.label}
                 isActive={pathname === link.href}
-                isNew={link.isNew}
-                newLabel={t.newLabel}
               />
             ))}
 
@@ -301,7 +285,7 @@ function NavLink({
   isScrolled: boolean;
   isActive?: boolean;
   isNew?: boolean;
-  newLabel: string;
+  newLabel?: string;
 }) {
   return (
     <Link
