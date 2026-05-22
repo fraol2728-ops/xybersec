@@ -104,3 +104,46 @@ div[role="alertdialog"] {
     background-clip: padding-box;
   }
 }
+
+/* Custom scrollbar — thin and modern */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--border));
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--muted-text));
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--border)) transparent;
+}
+
+/* Right panel aside — only show scrollbar on hover */
+.lesson-panel-aside {
+  scrollbar-width: none;
+}
+
+.lesson-panel-aside::-webkit-scrollbar {
+  display: none;
+}
+
+.lesson-panel-aside:hover {
+  scrollbar-width: thin;
+}
+
+.lesson-panel-aside:hover::-webkit-scrollbar {
+  display: block;
+  width: 3px;
+}
