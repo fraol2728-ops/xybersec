@@ -95,6 +95,23 @@ export async function saveOnboardingStep3(learningGoals: string[]) {
     data: { learningGoals, onboardingStep: 4, onboardingComplete: true },
   });
 
+  // Update Clerk publicMetadata so middleware can
+  // check onboarding status without a DB call
+  // and without relying on cookies
+  try {
+    const { clerkClient } = await import("@clerk/nextjs/server");
+    const client = await clerkClient();
+    await client.users.updateUserMetadata(userId, {
+      publicMetadata: {
+        onboardingComplete: true,
+      },
+    });
+  } catch (error) {
+    // Don't fail the action if metadata update fails
+    // Prisma is the source of truth
+    console.error("Failed to update Clerk metadata:", error);
+  }
+
   const { cookies } = await import("next/headers");
   const cookieStore = await cookies();
   cookieStore.set("onboarding_complete", "true", {
@@ -145,4 +162,38 @@ export async function getOnboardingUsername() {
     select: { username: true },
   });
   return profile?.username ?? null;
+}
+
+
+export async function checkAndBackfillOnboarding() {
+  const { userId } = await auth();
+  if (!userId) return;
+
+  const profile = await prisma.userProfile.findUnique({
+    where: { clerkId: userId },
+    select: { onboardingComplete: true },
+  });
+
+  if (!profile?.onboardingComplete) return;
+
+  try {
+    const { clerkClient } = await import("@clerk/nextjs/server");
+    const client = await clerkClient();
+
+    const user = await client.users.getUser(userId);
+    const meta = user.publicMetadata as {
+      onboardingComplete?: boolean;
+    };
+
+    if (!meta?.onboardingComplete) {
+      await client.users.updateUserMetadata(userId, {
+        publicMetadata: {
+          ...user.publicMetadata,
+          onboardingComplete: true,
+        },
+      });
+    }
+  } catch (error) {
+    console.error("Backfill failed:", error);
+  }
 }

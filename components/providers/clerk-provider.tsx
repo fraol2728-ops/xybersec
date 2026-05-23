@@ -7,5 +7,13 @@ export function ClientClerkProvider({
 }: {
   children: React.ReactNode;
 }) {
-  return <ClerkProvider>{children}</ClerkProvider>;
+  return (
+    <ClerkProvider
+      afterSignUpUrl="/onboarding"
+      afterSignInUrl="/dashboard"
+      afterSignOutUrl="/"
+    >
+      {children}
+    </ClerkProvider>
+  );
 }

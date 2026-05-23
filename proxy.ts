@@ -31,26 +31,21 @@ export default clerkMiddleware(async (auth, req) => {
     await auth.protect();
   }
 
-  const { userId } = await auth();
+  // Read onboarding status from Clerk session claims
+  // This works on any device, any browser, forever
+  // No cookie dependency
+  const { userId, sessionClaims } = await auth();
   const isLoggedIn = Boolean(userId);
   const pathname = req.nextUrl.pathname;
-  const onboardingComplete = req.cookies.get("onboarding_complete")?.value;
 
-  const isOnboardingFlowPath = [
-    "/onboarding/welcome",
-    "/onboarding/step-1",
-    "/onboarding/step-2",
-    "/onboarding/step-3",
-  ].includes(pathname);
-  const isCoursePath = pathname.startsWith("/courses/");
+  const onboardingComplete =
+    (sessionClaims?.publicMetadata as {
+      onboardingComplete?: boolean;
+    })?.onboardingComplete ?? false;
 
-  if (
-    !onboardingComplete &&
-    isLoggedIn &&
-    pathname === "/dashboard" &&
-    !isOnboardingFlowPath &&
-    !isCoursePath
-  ) {
+  // Only redirect to onboarding from exact /dashboard
+  // Never redirect from /onboarding/* paths or /courses/*
+  if (isLoggedIn && !onboardingComplete && pathname === "/dashboard") {
     return NextResponse.redirect(new URL("/onboarding", req.url));
   }
 });
