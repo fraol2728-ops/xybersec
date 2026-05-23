@@ -38,15 +38,34 @@ export default clerkMiddleware(async (auth, req) => {
   const isLoggedIn = Boolean(userId);
   const pathname = req.nextUrl.pathname;
 
-  const onboardingComplete =
+  // Check onboarding status from Clerk session claims
+  const claimsComplete =
     (sessionClaims?.publicMetadata as {
       onboardingComplete?: boolean;
     })?.onboardingComplete ?? false;
 
-  // Only redirect to onboarding from exact /dashboard
-  // Never redirect from /onboarding/* paths or /courses/*
-  if (isLoggedIn && !onboardingComplete && pathname === "/dashboard") {
-    return NextResponse.redirect(new URL("/onboarding", req.url));
+  // Only run DB check on /dashboard route for logged-in users
+  // when claims say incomplete. This handles stale session claims.
+  if (isLoggedIn && !claimsComplete && pathname === "/dashboard") {
+    try {
+      const { prisma } = await import("@/lib/prisma");
+      const profile = await prisma.userProfile.findUnique({
+        where: { clerkId: userId! },
+        select: { onboardingComplete: true },
+      });
+
+      // If DB says complete, allow dashboard access.
+      if (profile?.onboardingComplete) {
+        return NextResponse.next();
+      }
+
+      // DB also says incomplete, redirect to onboarding.
+      return NextResponse.redirect(new URL("/onboarding", req.url));
+    } catch (error) {
+      // If DB check fails, don't block the user.
+      console.error("Middleware DB check failed:", error);
+      return NextResponse.next();
+    }
   }
 });
 

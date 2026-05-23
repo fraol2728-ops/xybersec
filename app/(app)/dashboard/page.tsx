@@ -16,6 +16,35 @@ export default async function DashboardPage() {
     redirect("/");
   }
 
+  // Backfill Clerk metadata if onboarding is complete in DB
+  // but not in session claims. This fixes stale claims silently.
+  const clerkComplete =
+    (user.publicMetadata as {
+      onboardingComplete?: boolean;
+    })?.onboardingComplete;
+
+  if (!clerkComplete) {
+    const { prisma } = await import("@/lib/prisma");
+    const profile = await prisma.userProfile.findUnique({
+      where: { clerkId: user.id },
+      select: { onboardingComplete: true },
+    });
+
+    if (profile?.onboardingComplete) {
+      import("@clerk/nextjs/server")
+        .then(({ clerkClient }) => clerkClient())
+        .then((client) =>
+          client.users.updateUserMetadata(user.id, {
+            publicMetadata: {
+              ...user.publicMetadata,
+              onboardingComplete: true,
+            },
+          }),
+        )
+        .catch(console.error);
+    }
+  }
+
   const [{ data: courses }, userTier] = await Promise.all([
     sanityFetch({
       query: DASHBOARD_COURSES_QUERY,
