@@ -22,7 +22,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
   const courseSlug = lesson?.courseSlug ?? "";
   const canAccess = await canUserAccessLesson(courseId, moduleIsFree);
 
-  if (!canAccess) return <PaywallOverlay courseSlug={courseSlug} />;
+  if (!canAccess) return <PaywallOverlay courseSlug={courseSlug} courseId={lesson.courseId ?? ""} courseTitle={lesson.title ?? "This course"} />;
 
   const progressData = userId ? await getLessonProgress(lesson._id) : null;
 
