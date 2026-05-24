@@ -31,6 +31,9 @@ model UserProfile {
   currentStreak      Int              @default(0)
   longestStreak      Int              @default(0)
   lastActivityAt     DateTime?
+  weeklyActivity     Json?
+  level              Int              @default(1)
+  skillProgress      Json?
 
   // Timestamps
   createdAt          DateTime         @default(now())

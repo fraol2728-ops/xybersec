@@ -3,9 +3,10 @@ interface WelcomeBannerProps {
   username?: string | null;
   lessonsCompleted: number;
   currentStreak: number;
+  levelTitle: string;
 }
 
-export function WelcomeBanner({ firstName, username, lessonsCompleted, currentStreak }: WelcomeBannerProps) {
+export function WelcomeBanner({ firstName, username, lessonsCompleted, currentStreak, levelTitle }: WelcomeBannerProps) {
   return (
     <div className="rounded-2xl border border-border bg-muted p-6 relative overflow-hidden">
       <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
@@ -27,9 +28,11 @@ export function WelcomeBanner({ firstName, username, lessonsCompleted, currentSt
                     : "Complete a lesson today to start a new streak!"}
           </p>
         </div>
-        <div className="hidden sm:block text-right">
-          <p className="text-xs text-muted-foreground">Current time in Addis Ababa</p>
-          <p className="text-sm font-mono text-primary">🇪🇹 Ethiopia</p>
+        <div className="hidden sm:flex flex-col items-end gap-1">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-secondary/10 border border-secondary/20">
+            <span className="text-xs font-bold text-secondary">{levelTitle}</span>
+          </div>
+          <p className="text-xs text-muted-foreground">🇪🇹 Built for Ethiopia</p>
         </div>
       </div>
     </div>

@@ -2,6 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { getLevelFromXP } from "@/lib/levels";
 
 export interface DashboardStats {
   username: string | null;
@@ -11,13 +12,23 @@ export interface DashboardStats {
   lessonsCompleted: number;
   enrolledCourseIds: string[];
   lastCompletedLessonId: string | null;
-  lastCompletedAt: Date | null;
   userRank: number;
   leaderboard: {
     id: string;
     username: string | null;
     xpPoints: number;
   }[];
+  level: {
+    level: number;
+    title: string;
+    progressPercent: number;
+    xpToNext: number;
+    minXP: number;
+    maxXP: number;
+  };
+  weeklyActivity: Record<string, boolean>;
+  skillProgress: Record<string, number>;
+  learningGoals: string[];
 }
 
 export async function getDashboardData(): Promise<DashboardStats | null> {
@@ -34,6 +45,7 @@ export async function getDashboardData(): Promise<DashboardStats | null> {
         currentStreak: true,
         longestStreak: true,
         lastActivityAt: true,
+        learningGoals: true,
         enrollments: {
           where: { status: "ACTIVE" },
           select: { courseId: true },
@@ -70,6 +82,62 @@ export async function getDashboardData(): Promise<DashboardStats | null> {
       where: { xpPoints: { gt: profile.xpPoints } },
     });
 
+    const levelData = getLevelFromXP(profile.xpPoints);
+
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const recentProgress = await prisma.lessonProgress.findMany({
+      where: {
+        userId: profile.id,
+        completed: true,
+        completedAt: { gte: sevenDaysAgo },
+      },
+      select: { completedAt: true },
+    });
+
+    const weeklyActivity: Record<string, boolean> = {};
+    const today = new Date();
+
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split("T")[0];
+
+      const wasActive = recentProgress.some((p) => {
+        const pDate = p.completedAt?.toISOString().split("T")[0];
+        return pDate === dateStr;
+      });
+
+      weeklyActivity[dateStr] = wasActive;
+    }
+
+    const skillProgress: Record<string, number> = {};
+
+    const goalToCategoryMap: Record<string, string> = {
+      web_hacking: "Web Application Hacking",
+      network_pentesting: "Network Security",
+      linux: "Linux & CLI",
+      malware_analysis: "Malware Analysis",
+      digital_forensics: "Digital Forensics",
+      ctf: "CTF Challenges",
+      bug_bounty: "Bug Bounty",
+      social_engineering: "Social Engineering",
+    };
+    void goalToCategoryMap;
+
+    const userGoals = profile.learningGoals ?? [];
+    for (const goal of userGoals) {
+      skillProgress[goal] = 0;
+    }
+
+    if (userGoals.length > 0 && profile.progress.length > 0) {
+      const progressPerGoal = Math.floor((profile.progress.length * 5) / userGoals.length);
+      userGoals.forEach((goal) => {
+        skillProgress[goal] = Math.min(progressPerGoal, 100);
+      });
+    }
+
     const userRank = profile.xpPoints > 0 ? higherRankedCount + 1 : 0;
     const lastProgress = profile.progress[0] ?? null;
 
@@ -81,9 +149,19 @@ export async function getDashboardData(): Promise<DashboardStats | null> {
       lessonsCompleted: profile.progress.length,
       enrolledCourseIds: profile.enrollments.map((e) => e.courseId),
       lastCompletedLessonId: lastProgress?.lessonId ?? null,
-      lastCompletedAt: lastProgress?.completedAt ?? null,
       userRank,
       leaderboard,
+      level: {
+        level: levelData.level,
+        title: levelData.title,
+        progressPercent: levelData.progressPercent,
+        xpToNext: levelData.xpToNext,
+        minXP: levelData.minXP,
+        maxXP: levelData.maxXP,
+      },
+      weeklyActivity,
+      skillProgress,
+      learningGoals: userGoals,
     };
   } catch (error) {
     console.error("getDashboardData error:", error);
