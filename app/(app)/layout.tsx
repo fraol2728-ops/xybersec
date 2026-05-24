@@ -1,4 +1,4 @@
-import { Header } from "@/components/Header";
+import { ConditionalHeader } from "@/components/layout/ConditionalHeader";
 import { ClientClerkProvider } from "@/components/providers/clerk-provider";
 import { TutorWidget } from "@/components/tutor";
 import { SanityLive } from "@/sanity/lib/live";
@@ -6,8 +6,8 @@ import { SanityLive } from "@/sanity/lib/live";
 function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <ClientClerkProvider>
-      <div className="[&:has([data-lesson-page='true'])_header]:hidden [&:has([data-lesson-page='true'])_.app-content]:pt-0 [&:has([data-dashboard-page='true'])_header]:hidden [&:has([data-dashboard-page='true'])_.app-content]:pt-0">
-        <Header />
+      <div>
+        <ConditionalHeader />
         <div className="app-content pt-20">{children}</div>
       </div>
       <SanityLive />

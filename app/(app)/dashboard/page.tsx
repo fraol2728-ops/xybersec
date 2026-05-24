@@ -16,43 +16,66 @@ export default async function DashboardPage() {
   const user = await currentUser();
   if (!user) redirect("/sign-in");
 
-  const clerkUserId = user.id;
-
-  const [resolvedUser, dashboardData, { data: courses }] = await Promise.all([
-    currentUser(),
+  const [dashboardData, { data: courses }] = await Promise.all([
     getDashboardData(),
-    sanityFetch({ query: DASHBOARD_COURSES_QUERY, params: { userId: clerkUserId } }),
+    sanityFetch({ query: DASHBOARD_COURSES_QUERY, params: { userId: user.id } }),
   ]);
 
-  if (!resolvedUser) redirect("/sign-in");
+  const coursesWithProgress = (courses ?? [])
+    .map((course: any) => {
+      const allLessons = (course.modules ?? []).flatMap((m: any) => m.lessons ?? []);
+      const totalLessons = allLessons.length;
+      const completedLessons = allLessons.filter((lesson: any) => lesson.completedBy?.includes(user.id)).length;
+      const progress = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+      const nextLesson = allLessons.find((lesson: any) => !lesson.completedBy?.includes(user.id));
+      const firstLesson = course.modules?.[0]?.lessons?.[0];
+
+      return {
+        ...course,
+        totalLessons,
+        completedLessons,
+        progress,
+        nextLessonSlug: nextLesson?.slug ?? firstLesson?.slug ?? null,
+        nextLessonTitle: nextLesson?.title ?? firstLesson?.title ?? null,
+        continueHref: nextLesson?.slug ? `/lessons/${nextLesson.slug}` : `/courses/${course.slug}`,
+        isEnrolled: dashboardData?.profile.enrolledCourseIds.includes(course._id) ?? course.tier === "free",
+      };
+    })
+    .filter((c: any) => c.isEnrolled || c.tier === "free");
+
+  const activeCourse = coursesWithProgress.find((c: any) => c.progress < 100) ?? coursesWithProgress[0] ?? null;
 
   return (
-    <div data-dashboard-page="true" className="dark min-h-screen bg-background text-foreground">
+    <div className="dark min-h-screen bg-background text-foreground">
       <DashboardTopBar
         username={dashboardData?.profile.username}
         xpPoints={dashboardData?.profile.xpPoints ?? 0}
         currentStreak={dashboardData?.profile.currentStreak ?? 0}
         userRank={dashboardData?.userRank ?? 0}
-        firstName={resolvedUser.firstName ?? ""}
+        firstName={user.firstName ?? ""}
       />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
         <WelcomeBanner
-          firstName={resolvedUser.firstName ?? resolvedUser.username ?? "Hacker"}
+          firstName={user.firstName ?? user.username ?? "Hacker"}
           username={dashboardData?.profile.username}
           lessonsCompleted={dashboardData?.profile.lessonsCompleted ?? 0}
+          streakStatus={dashboardData?.streakStatus}
+          xpPoints={dashboardData?.profile.xpPoints ?? 0}
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
           <div className="lg:col-span-2 space-y-6">
-            <ContinueLearningCard courses={(courses as any[]) ?? []} userId={resolvedUser.id} />
+            <ContinueLearningCard course={activeCourse} />
             <StatsRow
               xpPoints={dashboardData?.profile.xpPoints ?? 0}
               currentStreak={dashboardData?.profile.currentStreak ?? 0}
               lessonsCompleted={dashboardData?.profile.lessonsCompleted ?? 0}
               userRank={dashboardData?.userRank ?? 0}
+              longestStreak={dashboardData?.profile.longestStreak ?? 0}
+              certificatesEarned={dashboardData?.profile.certificatesEarned ?? 0}
             />
-            <MyCoursesSection courses={(courses as any[]) ?? []} userId={resolvedUser.id} />
+            <MyCoursesSection courses={coursesWithProgress} />
           </div>
 
           <div className="space-y-6">
@@ -60,18 +83,18 @@ export default async function DashboardPage() {
               username={dashboardData?.profile.username}
               xpPoints={dashboardData?.profile.xpPoints ?? 0}
               currentStreak={dashboardData?.profile.currentStreak ?? 0}
+              longestStreak={dashboardData?.profile.longestStreak ?? 0}
               userRank={dashboardData?.userRank ?? 0}
-              firstName={resolvedUser.firstName ?? ""}
-              imageUrl={resolvedUser.imageUrl}
+              firstName={user.firstName ?? ""}
+              imageUrl={user.imageUrl}
+              lessonsCompleted={dashboardData?.profile.lessonsCompleted ?? 0}
+              certificatesEarned={dashboardData?.profile.certificatesEarned ?? 0}
             />
-            <MiniLeaderboard
-              students={dashboardData?.leaderboard ?? []}
-              currentUserId={dashboardData?.profile.username ?? ""}
-            />
+            <MiniLeaderboard students={dashboardData?.leaderboard ?? []} currentUsername={dashboardData?.profile.username ?? ""} />
             <AchievementsCard
               lessonsCompleted={dashboardData?.profile.lessonsCompleted ?? 0}
               currentStreak={dashboardData?.profile.currentStreak ?? 0}
-              coursesCompleted={0}
+              coursesCompleted={dashboardData?.profile.certificatesEarned ?? 0}
             />
           </div>
         </div>

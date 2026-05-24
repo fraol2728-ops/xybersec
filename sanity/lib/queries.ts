@@ -132,34 +132,30 @@ export const PROGRAMS_CAREER_PATHS_QUERY = defineQuery(`*[
   },
   "lessonCount": count(modules[]->lessons[])
 }`);
-export const DASHBOARD_COURSES_QUERY = defineQuery(`*[
-  _type == "course"
-] | order(_createdAt desc) {
-  _id,
-  title,
-  slug,
-  description,
-  tier,
-  featured,
-  completedBy,
-  thumbnail {
-    asset-> {
-      _id,
-      url
-    }
-  },
-  category-> {
+export const DASHBOARD_COURSES_QUERY = groq`
+  *[_type == "course"] | order(_createdAt asc) {
     _id,
-    title
-  },
-  modules[]-> {
-    lessons[]-> {
-      completedBy
+    title,
+    "slug": slug.current,
+    description,
+    tier,
+    thumbnail,
+    "totalModules": count(modules),
+    "totalLessons": count(modules[]->lessons[]),
+    modules[]-> {
+      _id,
+      title,
+      isFree,
+      "lessonCount": count(lessons),
+      lessons[]-> {
+        _id,
+        title,
+        "slug": slug.current,
+        completedBy,
+      }
     }
-  },
-  "moduleCount": count(modules),
-  "lessonCount": count(modules[]->lessons[])
-}`);
+  }
+`;
 
 export const COURSES_CATEGORIES_QUERY = defineQuery(`*[
   _type == "category"
