@@ -57,7 +57,7 @@ const SKILL_CONFIG: Record<string, { label: string; icon: string; color: string;
 export function SkillTracksCard({ skillProgress, learningGoals }: SkillTracksCardProps) {
   if (!learningGoals.length) {
     return (
-      <div className="rounded-2xl border border-border bg-muted p-5">
+      <div className="bg-white/[0.04] backdrop-blur-md border border-white/[0.08] rounded-lg p-4">
         <h3 className="text-sm font-semibold text-foreground">Skill Tracks</h3>
         <p className="text-sm text-muted-foreground">Update your profile to see skill tracks.</p>
       </div>
@@ -65,7 +65,7 @@ export function SkillTracksCard({ skillProgress, learningGoals }: SkillTracksCar
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-muted p-5">
+    <div className="bg-white/[0.04] backdrop-blur-md border border-white/[0.08] rounded-lg p-4">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">🎯 Skill Tracks</h3>
         <span className="text-xs text-muted-foreground">Based on your learning goals</span>
@@ -86,7 +86,7 @@ export function SkillTracksCard({ skillProgress, learningGoals }: SkillTracksCar
                 </div>
                 <span className="text-xs text-muted-foreground font-mono">{progress}%</span>
               </div>
-              <div className="w-full h-2 bg-background rounded-full overflow-hidden">
+              <div className="w-full h-1 bg-white/[0.06] rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full ${config.barColor} transition-all duration-700`}
                   style={{ width: `${progress}%` }}

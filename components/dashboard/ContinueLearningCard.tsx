@@ -26,16 +26,13 @@ interface ContinueLearningCardProps {
 export function ContinueLearningCard({ activeCourse }: ContinueLearningCardProps) {
   if (!activeCourse) {
     return (
-      <div className="rounded-2xl border border-border bg-muted p-6 text-center">
-        <span className="text-4xl block mb-3">🛡️</span>
-        <h3 className="font-semibold text-foreground mb-2">Ready to start learning?</h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          Begin your cybersecurity journey with our free fundamentals module.
-        </p>
-        <a
-          href="/courses"
-          className="inline-flex px-5 py-2.5 rounded-xl bg-primary text-background text-sm font-semibold hover:opacity-90 transition-all"
-        >
+      <div className="bg-white/[0.04] backdrop-blur-md border border-white/[0.08] rounded-lg p-6 text-center">
+        <div className="w-12 h-12 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-3">
+          <span className="text-2xl">🛡️</span>
+        </div>
+        <h3 className="font-semibold text-foreground mb-1">Start your cybersecurity journey</h3>
+        <p className="text-sm text-muted-foreground mb-4">Pick a course below and begin your first lesson for free.</p>
+        <a href="/courses" className="inline-flex px-4 py-2 rounded-lg bg-primary/10 border border-primary/20 text-primary text-sm font-semibold hover:bg-primary/20 transition-all">
           Browse Courses →
         </a>
       </div>
@@ -52,47 +49,32 @@ export function ContinueLearningCard({ activeCourse }: ContinueLearningCardProps
       : `/courses/${activeCourse.slug}`;
 
   return (
-    <div className="rounded-2xl border border-primary/30 bg-muted p-6 relative overflow-hidden hover:border-primary/50 transition-colors group">
-      <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-secondary" />
+    <div className="relative bg-cyan-400/[0.04] backdrop-blur-md border border-cyan-400/20 rounded-lg p-5 overflow-hidden">
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-primary via-secondary to-transparent" />
 
-      <div className="flex items-start justify-between mb-1">
-        <p className="text-xs font-semibold text-primary tracking-wider uppercase flex items-center gap-1.5 mb-3">
-          <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-          Continue Learning
-        </p>
-        <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">
+      <div className="flex items-start justify-between mb-3">
+        <div>
+          <p className="text-xs font-semibold text-primary tracking-wider uppercase flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+            Continue Learning
+          </p>
+          <h3 className="text-lg font-bold text-foreground mt-1">{activeCourse.title}</h3>
+          <p className="text-xs text-muted-foreground">
+            {activeCourse.completedLessons} of {activeCourse.totalLessons} lessons
+          </p>
+        </div>
+        <span className="text-xs font-bold text-primary bg-primary/10 border border-primary/20 px-2 py-1 rounded-md">
           {activeCourse.progressPercent}%
         </span>
       </div>
 
-      <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-primary transition-colors">{activeCourse.title}</h3>
-
-      <p className="text-sm text-muted-foreground mb-4">
-        {activeCourse.completedLessons} of {activeCourse.totalLessons} lessons completed
-      </p>
-
-      <div className="w-full h-2 bg-background rounded-full mb-5 overflow-hidden">
-        <div
-          className="h-full rounded-full bg-gradient-to-r from-primary to-secondary transition-all duration-700"
-          style={{ width: `${activeCourse.progressPercent}%` }}
-        />
+      <div className="w-full h-1.5 bg-white/[0.06] rounded-full overflow-hidden mb-4">
+        <div className="h-full rounded-full bg-gradient-to-r from-primary to-secondary" style={{ width: `${activeCourse.progressPercent}%` }} />
       </div>
 
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-muted-foreground">
-          {activeCourse.progressPercent === 0
-            ? "Start your first lesson"
-            : activeCourse.progressPercent === 100
-              ? "Course complete! 🎉"
-              : "Keep going, you're doing great!"}
-        </p>
-        <a
-          href={continueHref}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-background text-sm font-semibold hover:opacity-90 hover:shadow-lg hover:shadow-primary/25 transition-all"
-        >
-          {activeCourse.progressPercent === 0 ? "Start Now →" : "Continue →"}
-        </a>
-      </div>
+      <a href={continueHref} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 border border-primary/20 text-primary text-sm font-semibold hover:bg-primary/20 transition-all">
+        {activeCourse.progressPercent === 0 ? "Start Now →" : "Continue →"}
+      </a>
     </div>
   );
 }

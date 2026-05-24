@@ -9,7 +9,7 @@ interface MiniLeaderboardProps {
 
 export function MiniLeaderboard({ students, currentUsername }: MiniLeaderboardProps) {
   return (
-    <div className="rounded-2xl border border-border bg-muted p-5">
+    <div className="bg-white/[0.04] backdrop-blur-md border border-white/[0.08] rounded-lg p-4">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">🏆 Top Students</h3>
         <a href="/leaderboard" className="text-xs text-primary hover:opacity-80 transition-opacity">View all →</a>
@@ -22,7 +22,7 @@ export function MiniLeaderboard({ students, currentUsername }: MiniLeaderboardPr
           const medal = medals[index] ?? `#${index + 1}`;
 
           return (
-            <div key={student.id} className={`flex items-center justify-between p-2.5 rounded-lg transition-colors ${isCurrentUser ? "bg-primary/10 border border-primary/20" : "bg-background border border-border"}`}>
+            <div key={student.id} className={`flex items-center justify-between p-2.5 rounded-md transition-colors ${isCurrentUser ? "bg-primary/[0.08] border border-primary/20" : "hover:bg-white/[0.04]"}`}>
               <div className="flex items-center gap-2.5">
                 <span className="text-sm w-6 text-center">{medal}</span>
                 <span className={`text-sm font-medium ${isCurrentUser ? "text-primary" : "text-foreground"}`}>@{student.username ?? "anonymous"}</span>

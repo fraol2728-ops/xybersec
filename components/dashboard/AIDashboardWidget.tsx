@@ -52,7 +52,7 @@ export function AIDashboardWidget() {
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-muted p-5">
+    <div className="bg-white/[0.04] backdrop-blur-md border border-white/[0.08] rounded-lg p-4">
       <div className="flex items-center gap-2 mb-4">
         <div className="w-7 h-7 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
           <Bot className="w-4 h-4 text-primary" />
@@ -73,14 +73,14 @@ export function AIDashboardWidget() {
       )}
 
       {isPending && (
-        <div className="flex items-center gap-2 mb-3 p-3 bg-background rounded-lg border border-border">
+        <div className="flex items-center gap-2 mb-3 p-3 bg-white/[0.04] rounded-lg border border-white/[0.08]">
           <Loader2 className="w-3 h-3 text-primary animate-spin flex-shrink-0" />
           <span className="text-xs text-muted-foreground">Thinking...</span>
         </div>
       )}
 
       {response && !isPending && (
-        <div className="mb-3 p-3 bg-background rounded-lg border border-border">
+        <div className="mb-3 p-3 bg-white/[0.04] rounded-lg border border-white/[0.08]">
           <p className="text-xs text-foreground leading-relaxed">{response}</p>
           <button
             onClick={() => setResponse(null)}
@@ -97,7 +97,7 @@ export function AIDashboardWidget() {
             <button
               key={q}
               onClick={() => handleAsk(q)}
-              className="text-xs px-2 py-1 rounded-md bg-background border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all"
+              className="text-xs px-2 py-1 rounded-md bg-white/[0.04] border border-white/[0.08] text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all"
             >
               {q}
             </button>
@@ -113,7 +113,7 @@ export function AIDashboardWidget() {
             if (e.key === "Enter") handleAsk();
           }}
           placeholder="Ask a question..."
-          className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary transition-all"
+          className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary transition-all"
         />
         <button
           onClick={() => handleAsk()}

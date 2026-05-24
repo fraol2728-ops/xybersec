@@ -15,7 +15,7 @@ export function AchievementsCard({ lessonsCompleted, currentStreak, coursesCompl
   ];
 
   return (
-    <div className="rounded-2xl border border-border bg-muted p-5">
+    <div className="bg-white/[0.04] backdrop-blur-md border border-white/[0.08] rounded-lg p-4">
       <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
         🎖️ Achievements
         <span className="text-xs text-muted-foreground font-normal">{achievements.filter((a) => a.unlocked).length}/{achievements.length} unlocked</span>
@@ -23,12 +23,12 @@ export function AchievementsCard({ lessonsCompleted, currentStreak, coursesCompl
 
       <div className="grid grid-cols-3 gap-2">
         {achievements.map((achievement) => (
-          <div key={achievement.id} className={`flex flex-col items-center p-3 rounded-xl border text-center transition-all ${achievement.unlocked ? "border-primary/30 bg-primary/5" : "border-border bg-background opacity-60"}`}>
+          <div key={achievement.id} className={`flex flex-col items-center p-3 rounded-xl border text-center transition-all ${achievement.unlocked ? "border-primary/30 bg-primary/5" : "border-white/[0.08] bg-white/[0.04] opacity-60"}`}>
             <span className={`text-xl mb-1 ${achievement.unlocked ? "" : "grayscale opacity-50"}`}>{achievement.icon}</span>
             <p className={`${achievement.unlocked ? "text-foreground" : "text-muted-foreground"} text-xs font-semibold mb-0.5`}>{achievement.title}</p>
             {!achievement.unlocked && (
               <div className="w-full mt-1">
-                <div className="w-full h-1 bg-muted rounded-full overflow-hidden">
+                <div className="w-full h-1 bg-white/[0.06] rounded-full overflow-hidden">
                   <div className="h-full bg-primary/50 rounded-full" style={{ width: `${(achievement.progress / achievement.total) * 100}%` }} />
                 </div>
                 <p className="text-xs text-muted-foreground mt-0.5">{achievement.progress}/{achievement.total}</p>

@@ -25,7 +25,7 @@ export function WeeklyStreakWidget({ weeklyActivity, currentStreak, longestStrea
   });
 
   return (
-    <div className="rounded-2xl border border-border bg-muted p-5">
+    <div className="bg-white/[0.04] backdrop-blur-md border border-white/[0.08] rounded-lg p-4">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">🔥 Weekly Streak</h3>
         <span className="text-xs font-bold text-orange-400">
@@ -37,12 +37,12 @@ export function WeeklyStreakWidget({ weeklyActivity, currentStreak, longestStrea
         {last7Days.map((day, i) => (
           <div key={i} className="flex flex-col items-center gap-1">
             <div
-              className={`w-full aspect-square rounded-md transition-all duration-200 ${
+              className={`w-full aspect-square rounded-sm transition-all duration-200 ${
                 day.active
-                  ? "bg-primary shadow-sm shadow-primary/30"
+                  ? "bg-primary shadow-sm shadow-primary/40"
                   : day.isToday
-                    ? "bg-muted-foreground/20 border border-dashed border-border"
-                    : "bg-background border border-border"
+                    ? "bg-white/[0.06] border border-dashed border-white/20"
+                    : "bg-white/[0.04]"
               }`}
             />
             <span className="text-xs text-muted-foreground">{day.label}</span>
@@ -50,7 +50,7 @@ export function WeeklyStreakWidget({ weeklyActivity, currentStreak, longestStrea
         ))}
       </div>
 
-      <div className="flex items-center justify-between pt-3 border-t border-border">
+      <div className="flex items-center justify-between pt-3 border-t border-white/[0.08]">
         <div className="text-center">
           <p className="text-sm font-bold text-orange-400">🔥 {currentStreak}</p>
           <p className="text-xs text-muted-foreground">Current</p>
