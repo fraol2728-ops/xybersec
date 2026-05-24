@@ -93,3 +93,10 @@ export const TIER_FEATURES = [
     ],
   },
 ] as const;
+
+export const PRICING = {
+  COURSE_MONTHLY: 299,
+  COURSE_YEARLY: 2499,
+  CERTIFICATE: 500,
+  CURRENCY: "ETB",
+} as const;
