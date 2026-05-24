@@ -57,19 +57,24 @@ export async function markLessonComplete(
 
   const now = new Date();
   const lastActivity = profile.lastActivityAt;
-  let newStreak = profile.currentStreak;
+  let newStreak = 1;
 
   if (lastActivity) {
-    const diffHours = (now.getTime() - lastActivity.getTime()) / (1000 * 60 * 60);
-    if (diffHours < 24) {
-      newStreak = profile.currentStreak;
-    } else if (diffHours < 48) {
-      newStreak = profile.currentStreak + 1;
+    const todayStr = now.toISOString().split("T")[0];
+    const lastStr = lastActivity.toISOString().split("T")[0];
+
+    const today = new Date(todayStr);
+    const last = new Date(lastStr);
+
+    const diffDays = Math.round((today.getTime() - last.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) {
+      newStreak = profile.currentStreak || 1;
+    } else if (diffDays === 1) {
+      newStreak = (profile.currentStreak || 0) + 1;
     } else {
       newStreak = 1;
     }
-  } else {
-    newStreak = 1;
   }
 
   const updatedProfile = await prisma.userProfile.update({
@@ -83,6 +88,8 @@ export async function markLessonComplete(
   });
 
   revalidatePath(`/lessons/${lessonSlug}`);
+  revalidatePath("/dashboard");
+  revalidatePath("/lessons");
 
   return {
     success: true,
