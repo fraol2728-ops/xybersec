@@ -138,10 +138,12 @@ export const DASHBOARD_COURSES_QUERY = defineQuery(`*[
   _id,
   title,
   slug,
+  "slug": slug.current,
   description,
   tier,
   featured,
   completedBy,
+  thumbnail,
   thumbnail {
     asset-> {
       _id,
@@ -152,8 +154,17 @@ export const DASHBOARD_COURSES_QUERY = defineQuery(`*[
     _id,
     title
   },
+  "totalLessons": count(modules[]->lessons[]->_id),
+  "firstLessonSlug": modules[0]->lessons[0]->slug.current,
   modules[]-> {
+    _id,
+    title,
+    isFree,
+    "lessonCount": count(lessons[]),
     lessons[]-> {
+      _id,
+      title,
+      "slug": slug.current,
       completedBy
     }
   },

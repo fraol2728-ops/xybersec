@@ -4,10 +4,10 @@ interface MiniLeaderboardProps {
     username: string | null;
     xpPoints: number;
   }[];
-  currentUserId: string;
+  currentUsername: string;
 }
 
-export function MiniLeaderboard({ students, currentUserId }: MiniLeaderboardProps) {
+export function MiniLeaderboard({ students, currentUsername }: MiniLeaderboardProps) {
   return (
     <div className="rounded-2xl border border-border bg-muted p-5">
       <div className="flex items-center justify-between mb-4">
@@ -17,7 +17,7 @@ export function MiniLeaderboard({ students, currentUserId }: MiniLeaderboardProp
 
       <div className="space-y-2">
         {students.map((student, index) => {
-          const isCurrentUser = student.username === currentUserId;
+          const isCurrentUser = student.username === currentUsername;
           const medals = ["🥇", "🥈", "🥉"];
           const medal = medals[index] ?? `#${index + 1}`;
 
@@ -34,7 +34,7 @@ export function MiniLeaderboard({ students, currentUserId }: MiniLeaderboardProp
         })}
 
         {students.length === 0 && (
-          <p className="text-xs text-muted-foreground text-center py-4">Complete a lesson to join the leaderboard!</p>
+          <p className="text-xs text-muted-foreground text-center py-4">Be the first on the leaderboard!</p>
         )}
       </div>
     </div>

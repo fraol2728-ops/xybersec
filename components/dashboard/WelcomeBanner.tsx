@@ -2,9 +2,10 @@ interface WelcomeBannerProps {
   firstName: string;
   username?: string | null;
   lessonsCompleted: number;
+  currentStreak: number;
 }
 
-export function WelcomeBanner({ firstName, username, lessonsCompleted }: WelcomeBannerProps) {
+export function WelcomeBanner({ firstName, username, lessonsCompleted, currentStreak }: WelcomeBannerProps) {
   return (
     <div className="rounded-2xl border border-border bg-muted p-6 relative overflow-hidden">
       <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
@@ -17,7 +18,13 @@ export function WelcomeBanner({ firstName, username, lessonsCompleted }: Welcome
           <p className="text-muted-foreground text-sm mt-1">
             {lessonsCompleted === 0
               ? "Start your first lesson and begin your journey"
-              : `You've completed ${lessonsCompleted} lessons. Keep going!`}
+              : currentStreak >= 7
+                ? `🏆 ${currentStreak}-day streak! You're unstoppable!`
+                : currentStreak >= 3
+                  ? `🔥 ${currentStreak}-day streak! Keep the momentum!`
+                  : currentStreak >= 1
+                    ? `🔥 You're on a ${currentStreak}-day streak!`
+                    : "Complete a lesson today to start a new streak!"}
           </p>
         </div>
         <div className="hidden sm:block text-right">
