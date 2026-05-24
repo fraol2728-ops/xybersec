@@ -1,139 +1,81 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { Achievements } from "@/components/dashboard/Achievements";
-import { ContinueLearning } from "@/components/dashboard/ContinueLearning";
-import { CourseProgressCard } from "@/components/dashboard/CourseProgressCard";
-import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
-import { getUserTier } from "@/lib/course-access";
+import { DashboardTopBar } from "@/components/dashboard/DashboardTopBar";
+import { WelcomeBanner } from "@/components/dashboard/WelcomeBanner";
+import { ContinueLearningCard } from "@/components/dashboard/ContinueLearningCard";
+import { StatsRow } from "@/components/dashboard/StatsRow";
+import { MyCoursesSection } from "@/components/dashboard/MyCoursesSection";
+import { ProfileCard } from "@/components/dashboard/ProfileCard";
+import { MiniLeaderboard } from "@/components/dashboard/MiniLeaderboard";
+import { AchievementsCard } from "@/components/dashboard/AchievementsCard";
+import { getDashboardData } from "@/lib/actions/dashboard";
 import { sanityFetch } from "@/sanity/lib/live";
 import { DASHBOARD_COURSES_QUERY } from "@/sanity/lib/queries";
-import type { DASHBOARD_COURSES_QUERYResult } from "@/sanity.types";
 
 export default async function DashboardPage() {
   const user = await currentUser();
+  if (!user) redirect("/sign-in");
 
-  if (!user) {
-    redirect("/");
-  }
+  const clerkUserId = user.id;
 
-  // Backfill Clerk metadata if onboarding is complete in DB
-  // but not in session claims. This fixes stale claims silently.
-  const clerkComplete =
-    (user.publicMetadata as {
-      onboardingComplete?: boolean;
-    })?.onboardingComplete;
-
-  if (!clerkComplete) {
-    const { prisma } = await import("@/lib/prisma");
-    const profile = await prisma.userProfile.findUnique({
-      where: { clerkId: user.id },
-      select: { onboardingComplete: true },
-    });
-
-    if (profile?.onboardingComplete) {
-      import("@clerk/nextjs/server")
-        .then(({ clerkClient }) => clerkClient())
-        .then((client) =>
-          client.users.updateUserMetadata(user.id, {
-            publicMetadata: {
-              ...user.publicMetadata,
-              onboardingComplete: true,
-            },
-          }),
-        )
-        .catch(console.error);
-    }
-  }
-
-  const [{ data: courses }, userTier] = await Promise.all([
-    sanityFetch({
-      query: DASHBOARD_COURSES_QUERY,
-      params: { userId: user.id },
-    }),
-    getUserTier(),
+  const [resolvedUser, dashboardData, { data: courses }] = await Promise.all([
+    currentUser(),
+    getDashboardData(),
+    sanityFetch({ query: DASHBOARD_COURSES_QUERY, params: { userId: clerkUserId } }),
   ]);
 
-  const firstName = user.firstName ?? user.username ?? "Operator";
-
-  const dashboardCourses = courses as DASHBOARD_COURSES_QUERYResult;
-
-  const courseProgress = dashboardCourses.map((course) => {
-    const lessons = (course.modules ?? []).flatMap(
-      (module) => module.lessons ?? [],
-    );
-    const totalLessons = lessons.length;
-    const completedLessons = lessons.filter((lesson) =>
-      lesson.completedBy?.includes(user.id),
-    ).length;
-    const progress =
-      totalLessons > 0
-        ? Math.round((completedLessons / totalLessons) * 100)
-        : 0;
-    return {
-      id: course._id,
-      title: course.title ?? "Untitled Course",
-      progress,
-      courseHref: `/courses/${course.slug?.current ?? ""}`,
-      nextLessonTitle:
-        progress < 100 ? "Continue your next mission" : "Final review",
-      lessonHref: `/courses/${course.slug?.current ?? ""}`,
-    };
-  });
-
-  const activeCourse =
-    courseProgress.find((course) => course.progress < 100) ?? courseProgress[0];
+  if (!resolvedUser) redirect("/sign-in");
 
   return (
-    <div className="min-h-screen bg-[#05080f] text-white">
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(34,211,238,0.12),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(59,130,246,0.1),transparent_35%)]" />
-      <div className="relative mx-auto flex max-w-[1400px]">
-        <DashboardSidebar />
+    <div data-dashboard-page="true" className="dark min-h-screen bg-background text-foreground">
+      <DashboardTopBar
+        username={dashboardData?.profile.username}
+        xpPoints={dashboardData?.profile.xpPoints ?? 0}
+        currentStreak={dashboardData?.profile.currentStreak ?? 0}
+        userRank={dashboardData?.userRank ?? 0}
+        firstName={resolvedUser.firstName ?? ""}
+      />
 
-        <main className="w-full px-5 pb-10 pt-24 lg:px-10 lg:pt-10">
-          <section className="mb-8 rounded-2xl border border-cyan-500/20 bg-[#070d18]/80 p-6">
-            <p className="text-sm uppercase tracking-[0.2em] text-cyan-400">
-              Welcome back, {firstName}
-            </p>
-            <h1 className="mt-2 text-3xl font-bold text-white">
-              Continue your cybersecurity training
-            </h1>
-            <p className="mt-2 text-zinc-400">
-              Current access:{" "}
-              <span className="capitalize text-cyan-300">{userTier}</span>
-            </p>
-          </section>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
+        <WelcomeBanner
+          firstName={resolvedUser.firstName ?? resolvedUser.username ?? "Hacker"}
+          username={dashboardData?.profile.username}
+          lessonsCompleted={dashboardData?.profile.lessonsCompleted ?? 0}
+        />
 
-          <div className="space-y-8">
-            {activeCourse && (
-              <ContinueLearning
-                title={activeCourse.title}
-                lessonTitle={activeCourse.nextLessonTitle}
-                progress={activeCourse.progress}
-                resumeHref={activeCourse.lessonHref}
-              />
-            )}
-
-            <section>
-              <h3 className="mb-4 text-xl font-semibold text-white">
-                My Courses
-              </h3>
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                {courseProgress.map((course, index) => (
-                  <CourseProgressCard
-                    key={course.id}
-                    title={course.title}
-                    progress={course.progress}
-                    href={course.courseHref}
-                    index={index}
-                  />
-                ))}
-              </div>
-            </section>
-
-            <Achievements />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+          <div className="lg:col-span-2 space-y-6">
+            <ContinueLearningCard courses={(courses as any[]) ?? []} userId={resolvedUser.id} />
+            <StatsRow
+              xpPoints={dashboardData?.profile.xpPoints ?? 0}
+              currentStreak={dashboardData?.profile.currentStreak ?? 0}
+              lessonsCompleted={dashboardData?.profile.lessonsCompleted ?? 0}
+              userRank={dashboardData?.userRank ?? 0}
+            />
+            <MyCoursesSection courses={(courses as any[]) ?? []} userId={resolvedUser.id} />
           </div>
-        </main>
-      </div>
+
+          <div className="space-y-6">
+            <ProfileCard
+              username={dashboardData?.profile.username}
+              xpPoints={dashboardData?.profile.xpPoints ?? 0}
+              currentStreak={dashboardData?.profile.currentStreak ?? 0}
+              userRank={dashboardData?.userRank ?? 0}
+              firstName={resolvedUser.firstName ?? ""}
+              imageUrl={resolvedUser.imageUrl}
+            />
+            <MiniLeaderboard
+              students={dashboardData?.leaderboard ?? []}
+              currentUserId={dashboardData?.profile.username ?? ""}
+            />
+            <AchievementsCard
+              lessonsCompleted={dashboardData?.profile.lessonsCompleted ?? 0}
+              currentStreak={dashboardData?.profile.currentStreak ?? 0}
+              coursesCompleted={0}
+            />
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
