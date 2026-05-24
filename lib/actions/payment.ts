@@ -4,14 +4,8 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { generateTxRef, initializePayment, verifyPayment } from "@/lib/chapa";
+import { PRICING } from "@/lib/constants";
 import { prisma } from "@/lib/prisma";
-
-export const PRICING = {
-  COURSE_MONTHLY: 299,
-  COURSE_YEARLY: 2499,
-  CERTIFICATE: 500,
-  CURRENCY: "ETB",
-} as const;
 
 export async function initializeCoursePayment(courseId: string, courseTitle: string, plan: "monthly" | "yearly" = "monthly") {
   const { userId } = await auth();
