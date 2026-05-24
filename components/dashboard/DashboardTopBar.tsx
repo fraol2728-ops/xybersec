@@ -8,9 +8,10 @@ interface DashboardTopBarProps {
   currentStreak: number;
   userRank: number;
   firstName: string;
+  levelTitle: string;
 }
 
-export function DashboardTopBar({ xpPoints, currentStreak, userRank }: DashboardTopBarProps) {
+export function DashboardTopBar({ xpPoints, currentStreak, userRank, levelTitle }: DashboardTopBarProps) {
   return (
     <div className="fixed top-0 left-0 right-0 z-50 h-16 bg-background/95 backdrop-blur-md border-b border-border">
       <div className="max-w-7xl mx-auto h-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
@@ -45,6 +46,10 @@ export function DashboardTopBar({ xpPoints, currentStreak, userRank }: Dashboard
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted border border-border">
             <span className="text-sm">🔥</span>
             <span className="text-xs font-bold text-foreground">{currentStreak} day streak</span>
+          </div>
+
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary/10 border border-secondary/20">
+            <span className="text-xs font-bold text-secondary">{levelTitle}</span>
           </div>
 
           {userRank > 0 && (

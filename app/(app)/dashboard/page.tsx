@@ -11,6 +11,9 @@ import { MyCoursesSection } from "@/components/dashboard/MyCoursesSection";
 import { ProfileCard } from "@/components/dashboard/ProfileCard";
 import { MiniLeaderboard } from "@/components/dashboard/MiniLeaderboard";
 import { AchievementsCard } from "@/components/dashboard/AchievementsCard";
+import { WeeklyStreakWidget } from "@/components/dashboard/WeeklyStreakWidget";
+import { SkillTracksCard } from "@/components/dashboard/SkillTracksCard";
+import { AIDashboardWidget } from "@/components/dashboard/AIDashboardWidget";
 
 export default async function DashboardPage() {
   const user = await currentUser();
@@ -48,19 +51,23 @@ export default async function DashboardPage() {
         xpPoints={dashboardData?.xpPoints ?? 0}
         currentStreak={dashboardData?.currentStreak ?? 0}
         userRank={dashboardData?.userRank ?? 0}
+        levelTitle={dashboardData?.level.title ?? "Rookie"}
         firstName={user.firstName ?? ""}
       />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
         <WelcomeBanner
-          firstName={user.firstName ?? user.username ?? "Hacker"}
+          firstName={user.firstName ?? "Hacker"}
           username={dashboardData?.username}
           lessonsCompleted={dashboardData?.lessonsCompleted ?? 0}
           currentStreak={dashboardData?.currentStreak ?? 0}
+          levelTitle={dashboardData?.level.title ?? "Rookie"}
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
           <div className="lg:col-span-2 space-y-6">
+            <ContinueLearningCard activeCourse={activeCourse ?? null} />
+
             <StatsRow
               xpPoints={dashboardData?.xpPoints ?? 0}
               currentStreak={dashboardData?.currentStreak ?? 0}
@@ -68,7 +75,10 @@ export default async function DashboardPage() {
               userRank={dashboardData?.userRank ?? 0}
             />
 
-            <ContinueLearningCard activeCourse={activeCourse ?? null} />
+            <SkillTracksCard
+              skillProgress={dashboardData?.skillProgress ?? {}}
+              learningGoals={dashboardData?.learningGoals ?? []}
+            />
 
             <MyCoursesSection courses={normalizedCourses} courseProgressMap={courseProgressMap} />
           </div>
@@ -81,12 +91,30 @@ export default async function DashboardPage() {
               userRank={dashboardData?.userRank ?? 0}
               firstName={user.firstName ?? ""}
               imageUrl={user.imageUrl}
+              level={
+                dashboardData?.level ?? {
+                  level: 1,
+                  title: "Rookie",
+                  progressPercent: 0,
+                  xpToNext: 1000,
+                  minXP: 0,
+                  maxXP: 999,
+                }
+              }
+            />
+
+            <WeeklyStreakWidget
+              weeklyActivity={dashboardData?.weeklyActivity ?? {}}
+              currentStreak={dashboardData?.currentStreak ?? 0}
+              longestStreak={dashboardData?.longestStreak ?? 0}
             />
 
             <MiniLeaderboard
               students={dashboardData?.leaderboard ?? []}
               currentUsername={dashboardData?.username ?? ""}
             />
+
+            <AIDashboardWidget />
 
             <AchievementsCard
               lessonsCompleted={dashboardData?.lessonsCompleted ?? 0}

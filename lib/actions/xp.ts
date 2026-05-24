@@ -3,6 +3,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { getLevelFromXP } from "@/lib/levels";
 
 const XP_PER_LESSON = 50;
 
@@ -84,6 +85,24 @@ export async function markLessonComplete(
       currentStreak: newStreak,
       longestStreak: Math.max(profile.longestStreak, newStreak),
       lastActivityAt: now,
+    },
+  });
+
+  const todayStr = new Date().toISOString().split("T")[0];
+  const currentActivity = (updatedProfile.weeklyActivity as Record<string, boolean> | null) ?? {};
+  currentActivity[todayStr] = true;
+
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().split("T")[0];
+
+  const trimmedActivity = Object.fromEntries(Object.entries(currentActivity).filter(([date]) => date >= thirtyDaysAgoStr));
+
+  await prisma.userProfile.update({
+    where: { id: profile.id },
+    data: {
+      weeklyActivity: trimmedActivity,
+      level: getLevelFromXP(updatedProfile.xpPoints).level,
     },
   });
 
