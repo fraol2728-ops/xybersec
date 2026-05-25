@@ -14,9 +14,10 @@ interface CourseContentProps {
   course: NonNullable<COURSE_WITH_MODULES_QUERYResult>;
   userId: string | null;
   isEnrolled: boolean;
+  unlockedModules?: Record<string, boolean>;
 }
 
-export function CourseContent({ course, userId, isEnrolled }: CourseContentProps) {
+export function CourseContent({ course, userId, isEnrolled, unlockedModules = {} }: CourseContentProps) {
   const { isLoaded: isAuthLoaded } = useAuth();
   const userTier = useUserTier();
   const hasAccess = hasTierAccess(userTier, course.tier);
@@ -86,6 +87,7 @@ export function CourseContent({ course, userId, isEnrolled }: CourseContentProps
             modules={course.modules ?? null}
             userId={userId}
             isEnrolled={isEnrolled}
+            unlockedModules={unlockedModules}
           />
         </div>
       ) : (

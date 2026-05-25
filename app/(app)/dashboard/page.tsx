@@ -15,14 +15,17 @@ import { AchievementsCard } from "@/components/dashboard/AchievementsCard";
 import { WeeklyStreakWidget } from "@/components/dashboard/WeeklyStreakWidget";
 import { SkillTracksCard } from "@/components/dashboard/SkillTracksCard";
 import { AIDashboardWidget } from "@/components/dashboard/AIDashboardWidget";
+import { getCPBalance, grantWelcomeBonus } from "@/lib/actions/cp";
 
 export default async function DashboardPage() {
   const user = await currentUser();
   if (!user) redirect("/sign-in");
+  grantWelcomeBonus().catch(console.error);
 
-  const [dashboardData, { data: courses }] = await Promise.all([
+  const [dashboardData, { data: courses }, cpBalance] = await Promise.all([
     getDashboardData(),
     sanityFetch({ query: DASHBOARD_COURSES_QUERY }),
+    getCPBalance(),
   ]);
 
   const normalizedCourses = (courses ?? []) as any[];
@@ -72,6 +75,7 @@ export default async function DashboardPage() {
         userRank={dashboardData?.userRank ?? 0}
         levelTitle={dashboardData?.level.title ?? "Rookie"}
         firstName={user.firstName ?? ""}
+        cpBalance={cpBalance}
       />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { UserButton } from "@clerk/nextjs";
+import { Zap } from "lucide-react";
 
 interface DashboardTopBarProps {
   username?: string | null;
@@ -9,9 +10,10 @@ interface DashboardTopBarProps {
   userRank: number;
   firstName: string;
   levelTitle: string;
+  cpBalance: number;
 }
 
-export function DashboardTopBar({ xpPoints, currentStreak, userRank, levelTitle }: DashboardTopBarProps) {
+export function DashboardTopBar({ xpPoints, currentStreak, userRank, levelTitle, cpBalance }: DashboardTopBarProps) {
   return (
     <div className="fixed top-0 left-0 right-0 z-50 h-16 bg-background/95 backdrop-blur-md border-b border-border">
       <div className="max-w-7xl mx-auto h-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
@@ -51,6 +53,13 @@ export function DashboardTopBar({ xpPoints, currentStreak, userRank, levelTitle 
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary/10 border border-secondary/20">
             <span className="text-xs font-bold text-secondary">{levelTitle}</span>
           </div>
+          <Link
+            href="/store"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-colors"
+          >
+            <Zap className="w-3.5 h-3.5 text-primary" />
+            <span className="text-xs font-bold text-primary">{cpBalance} CP</span>
+          </Link>
 
           {userRank > 0 && (
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20">

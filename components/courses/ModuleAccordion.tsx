@@ -21,9 +21,10 @@ interface ModuleAccordionProps {
   modules: Module[] | null;
   userId?: string | null;
   isEnrolled?: boolean;
+  unlockedModules?: Record<string, boolean>;
 }
 
-export function ModuleAccordion({ modules, userId, isEnrolled = false }: ModuleAccordionProps) {
+export function ModuleAccordion({ modules, userId, isEnrolled = false, unlockedModules = {} }: ModuleAccordionProps) {
   if (!modules?.length) {
     return (
       <div className="py-12 text-center text-zinc-500">
@@ -77,13 +78,15 @@ export function ModuleAccordion({ modules, userId, isEnrolled = false }: ModuleA
                       </p>
                     </div>
                     <div className="hidden items-center gap-2 sm:flex">
-                      {(module as any).isFree ? (
+                      {(module as any).isFree || ((module as any).cpCost ?? 0) === 0 ? (
                         <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
                           FREE
                         </span>
+                      ) : unlockedModules[module._id] ? (
+                        <span className="rounded-full border border-green-400/30 bg-green-500/10 px-2 py-0.5 text-xs font-semibold text-green-400">✓ Unlocked</span>
                       ) : !isEnrolled ? (
                         <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-xs font-semibold text-muted-foreground">
-                          🔒 LOCKED
+                          🔒 {(module as any).cpCost ?? 100} CP to unlock
                         </span>
                       ) : null}
                     </div>
@@ -104,7 +107,7 @@ export function ModuleAccordion({ modules, userId, isEnrolled = false }: ModuleA
                     {module.lessons?.map((lesson) => {
                       const completedState = isLessonCompleted(lesson);
 
-                      const isLocked = !(module as any).isFree && !isEnrolled;
+                      const isLocked = !((module as any).isFree || ((module as any).cpCost ?? 0) === 0 || isEnrolled || unlockedModules[module._id]);
                       const lessonClassName = `flex items-center gap-2.5 rounded-md px-2 py-2 text-sm text-zinc-300 transition ${
                         isLocked ? "opacity-50" : "hover:bg-zinc-800/50"
                       }`;

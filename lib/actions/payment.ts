@@ -110,6 +110,20 @@ export async function verifyAndFulfillPayment(txRef: string) {
     const verification = await verifyPayment(txRef);
     if (verification.data.status !== "success") return { error: "Payment not successful", status: verification.data.status };
 
+    const cpTransaction = await prisma.cPTransaction.findUnique({ where: { chapaRef: txRef } });
+    if (cpTransaction && cpTransaction.type === "PURCHASE" && cpTransaction.amount > 0) {
+      const profile = await prisma.userProfile.findUnique({ where: { clerkId: cpTransaction.userId } });
+      if (profile) {
+        await prisma.userProfile.update({
+          where: { id: profile.id },
+          data: { cpBalance: { increment: cpTransaction.amount } },
+        });
+      }
+      revalidatePath("/dashboard");
+      revalidatePath("/store");
+      return { success: true, type: "CP_PURCHASE" };
+    }
+
     const payment = await prisma.payment.findUnique({ where: { chapaReference: txRef } });
     if (!payment) return { error: "Payment record not found" };
     if (payment.status === "SUCCESS") return { alreadyProcessed: true, type: payment.type };

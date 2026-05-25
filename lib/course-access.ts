@@ -33,23 +33,55 @@ export async function getUserCourseAccess(courseId: string) {
 
 export async function canUserAccessLesson(
   courseId: string,
+  moduleId: string,
   moduleIsFree: boolean,
-): Promise<boolean> {
-  if (moduleIsFree) return true;
+  cpCost?: number,
+): Promise<{
+  canAccess: boolean;
+  reason: "free" | "enrolled" | "unlocked" | "locked" | "unauthenticated";
+  cpCost?: number;
+  userCPBalance?: number;
+}> {
+  if (moduleIsFree || (cpCost ?? 0) === 0) {
+    return { canAccess: true, reason: "free" };
+  }
 
   const { userId } = await auth();
-  if (!userId) return false;
+  if (!userId) {
+    return { canAccess: false, reason: "unauthenticated" };
+  }
+
+  const moduleUnlock = await prisma.moduleUnlock.findUnique({
+    where: {
+      userId_moduleId: { userId, moduleId },
+    },
+  });
+
+  if (moduleUnlock) {
+    return { canAccess: true, reason: "unlocked" };
+  }
 
   const profile = await prisma.userProfile.findUnique({
     where: { clerkId: userId },
-    include: {
+    select: {
+      id: true,
+      cpBalance: true,
       enrollments: {
         where: { courseId },
       },
     },
   });
 
-  return (profile?.enrollments?.length ?? 0) > 0;
+  if ((profile?.enrollments?.length ?? 0) > 0) {
+    return { canAccess: true, reason: "enrolled" };
+  }
+
+  return {
+    canAccess: false,
+    reason: "locked",
+    cpCost: cpCost ?? 100,
+    userCPBalance: profile?.cpBalance ?? 0,
+  };
 }
 
 export async function getUserTier(): Promise<"free" | "pro" | "ultra"> {
