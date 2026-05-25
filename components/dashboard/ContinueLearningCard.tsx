@@ -42,19 +42,9 @@ export function ContinueLearningCard({ activeCourse }: ContinueLearningCardProps
     );
   }
 
-  const continueHref = (() => {
-    const firstLesson = activeCourse.modules?.flatMap((m) => m.lessons ?? []).find((l) => l.slug);
-
-    if (firstLesson?.slug) {
-      return `/lessons/${firstLesson.slug}`;
-    }
-
-    if (activeCourse.firstLessonSlug) {
-      return `/lessons/${activeCourse.firstLessonSlug}`;
-    }
-
-    return `/courses/${activeCourse.slug}`;
-  })();
+  const continueHref = activeCourse.slug
+    ? `/courses/${activeCourse.slug}`
+    : "/courses";
 
   return (
     <div className="rounded-2xl border border-primary/30 bg-muted p-6 relative overflow-hidden hover:border-primary/50 transition-colors group">
@@ -73,7 +63,11 @@ export function ContinueLearningCard({ activeCourse }: ContinueLearningCardProps
       <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-primary transition-colors">{activeCourse.title}</h3>
 
       <p className="text-sm text-muted-foreground mb-4">
-        {activeCourse.completedLessons} of {activeCourse.totalLessons} lessons completed
+        {activeCourse.progressPercent === 0
+          ? "Start your first lesson"
+          : activeCourse.progressPercent === 100
+            ? "Course complete! Get your certificate 🎓"
+            : `${activeCourse.completedLessons} of ${activeCourse.totalLessons} lessons completed`}
       </p>
 
       <div className="w-full h-2 bg-background rounded-full mb-5 overflow-hidden">
@@ -88,14 +82,18 @@ export function ContinueLearningCard({ activeCourse }: ContinueLearningCardProps
           {activeCourse.progressPercent === 0
             ? "Start your first lesson"
             : activeCourse.progressPercent === 100
-              ? "Course complete! 🎉"
-              : "Keep going, you're doing great!"}
+              ? "Course complete! Get your certificate 🎓"
+              : `${activeCourse.completedLessons} of ${activeCourse.totalLessons} lessons completed`}
         </p>
         <a
           href={continueHref}
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-background text-sm font-semibold hover:opacity-90 hover:shadow-lg hover:shadow-primary/25 transition-all"
         >
-          {activeCourse.progressPercent === 0 ? "Start Now →" : "Continue →"}
+          {activeCourse.progressPercent === 0
+            ? "Start Now →"
+            : activeCourse.progressPercent === 100
+              ? "Review Course →"
+              : "Continue →"}
         </a>
       </div>
     </div>

@@ -11,7 +11,11 @@ export async function markLessonComplete(
   lessonId: string,
   lessonSlug: string,
   courseId: string,
+  moduleId: string,
+  totalLessonsInModule: number,
 ) {
+  void moduleId;
+  void totalLessonsInModule;
   const { userId } = await auth();
   if (!userId) return { error: "Not authenticated" };
 

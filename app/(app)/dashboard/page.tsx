@@ -41,29 +41,30 @@ export default async function DashboardPage() {
 
   const activeCourse = (() => {
     if (dashboardData?.activeCourseId) {
-      const course = (normalizedCourses ?? []).find((c) => c._id === dashboardData.activeCourseId);
-      if (course) {
+      const found = (normalizedCourses ?? []).find((c: any) => c._id === dashboardData.activeCourseId);
+      if (found) {
+        const progress = courseProgressMap[found._id];
         return {
-          ...course,
-          ...(courseProgressMap[course._id] ?? {
-            completedLessons: 0,
-            progressPercent: 0,
-            totalLessons: course.totalLessons ?? 0,
-          }),
+          ...found,
+          completedLessons: progress?.completedLessons ?? 0,
+          progressPercent: progress?.progressPercent ?? 0,
+          totalLessons: progress?.totalLessons ?? found.totalLessons ?? 0,
         };
       }
     }
 
-    return (normalizedCourses ?? [])
-      .filter((c) => c.tier === "free")
-      .map((c) => ({
-        ...c,
-        ...(courseProgressMap[c._id] ?? {
-          completedLessons: 0,
-          progressPercent: 0,
-          totalLessons: c.totalLessons ?? 0,
-        }),
-      }))[0] ?? null;
+    const freeCourse = (normalizedCourses ?? []).find((c: any) => c.tier === "free");
+    if (freeCourse) {
+      const progress = courseProgressMap[freeCourse._id];
+      return {
+        ...freeCourse,
+        completedLessons: progress?.completedLessons ?? 0,
+        progressPercent: progress?.progressPercent ?? 0,
+        totalLessons: progress?.totalLessons ?? freeCourse.totalLessons ?? 0,
+      };
+    }
+
+    return null;
   })();
 
   return (
