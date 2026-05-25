@@ -206,21 +206,19 @@ export const COURSE_WITH_MODULES_QUERY = defineQuery(`*[
     description,
     isFree,
     cpCost,
-    completedBy,
+    "lessonCount": count(lessons[]),
+    "estimatedMinutes": count(lessons[]) * 15,
     lessons[]-> {
       _id,
       title,
       "slug": slug.current,
-      description,
-      completedBy,
-      video {
-        asset-> {
-          playbackId
-        }
-      }
+      description
     }
   },
   completedBy,
+  "totalLessons": count(modules[]->lessons[]->_id),
+  "totalModules": count(modules[]),
+  "estimatedHours": round(count(modules[]->lessons[]->_id) * 15 / 60),
   "moduleCount": count(modules),
   "lessonCount": count(modules[]->lessons[]),
   "completedLessonCount": count(modules[]->lessons[]->completedBy[@==$userId])

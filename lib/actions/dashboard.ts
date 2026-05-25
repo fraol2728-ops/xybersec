@@ -16,6 +16,7 @@ export interface DashboardStats {
   activeCourseId: string | null;
   recentCourseIds: string[];
   completedLessonIds: string[];
+  unlockedModuleIds: string[];
   leaderboard: {
     id: string;
     username: string | null;
@@ -145,6 +146,19 @@ export async function getDashboardData(): Promise<DashboardStats | null> {
     const lastProgress = profile.progress[0] ?? null;
     const activeCourseIds = [...new Set(profile.progress.map((p) => p.courseId))];
 
+    let activeUnlockedModules: string[] = [];
+
+    if (activeCourseIds[0]) {
+      const unlocks = await prisma.moduleUnlock.findMany({
+        where: {
+          userId,
+          courseId: activeCourseIds[0],
+        },
+        select: { moduleId: true },
+      });
+      activeUnlockedModules = unlocks.map((u) => u.moduleId);
+    }
+
     return {
       username: profile.username,
       xpPoints: profile.xpPoints,
@@ -157,6 +171,7 @@ export async function getDashboardData(): Promise<DashboardStats | null> {
       activeCourseId: lastProgress?.courseId ?? null,
       recentCourseIds: activeCourseIds.slice(0, 3),
       completedLessonIds: profile.progress.map((p) => p.lessonId),
+      unlockedModuleIds: activeUnlockedModules,
       leaderboard,
       level: {
         level: levelData.level,

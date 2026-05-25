@@ -101,6 +101,7 @@ export default async function DashboardPage() {
             <ActiveModuleLessons
               activeCourse={activeCourse ?? null}
               completedLessonIds={dashboardData?.completedLessonIds ?? []}
+              unlockedModuleIds={dashboardData?.unlockedModuleIds ?? []}
             />
 
             <SkillTracksCard
