@@ -37,6 +37,27 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    const cpTransaction = await prisma.cPTransaction.findUnique({
+      where: { chapaRef: txRef },
+    });
+
+    if (cpTransaction && cpTransaction.type === "PURCHASE" && cpTransaction.amount > 0) {
+      const profile = await prisma.userProfile.findUnique({
+        where: { clerkId: cpTransaction.userId },
+      });
+
+      if (profile) {
+        await prisma.userProfile.update({
+          where: { id: profile.id },
+          data: {
+            cpBalance: {
+              increment: cpTransaction.amount,
+            },
+          },
+        });
+      }
+    }
+
     return NextResponse.json({ message: "Webhook processed" }, { status: 200 });
   } catch (error) {
     console.error("Webhook error:", error);

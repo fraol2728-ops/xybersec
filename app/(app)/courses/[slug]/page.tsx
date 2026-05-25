@@ -7,6 +7,7 @@ import { absoluteUrl, siteConfig } from "@/lib/seo";
 import { prisma } from "@/lib/prisma";
 import { sanityFetch } from "@/sanity/lib/live";
 import { COURSE_WITH_MODULES_QUERY } from "@/sanity/lib/queries";
+import { checkModuleUnlocks } from "@/lib/actions/cp";
 
 interface CoursePageProps {
   params: Promise<{ slug: string }>;
@@ -84,6 +85,8 @@ export default async function CoursePage({ params }: CoursePageProps) {
   }
 
   let isEnrolled = false;
+  const moduleIds = course.modules?.map((m: any) => m._id).filter(Boolean) ?? [];
+  const unlockedModules = moduleIds.length > 0 ? await checkModuleUnlocks(moduleIds) : {};
   if (userId) {
     const profile = await prisma.userProfile.findUnique({
       where: { clerkId: userId },
@@ -168,7 +171,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
       />
 
       <main className="relative z-10 px-6 lg:px-12 py-12 max-w-7xl mx-auto">
-        <CourseContent course={course} userId={userId} isEnrolled={isEnrolled} />
+        <CourseContent course={course} userId={userId} isEnrolled={isEnrolled} unlockedModules={unlockedModules} />
       </main>
     </div>
   );

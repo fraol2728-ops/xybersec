@@ -36,6 +36,19 @@ export const moduleType = defineType({
       initialValue: false,
     }),
     defineField({
+      name: "cpCost",
+      title: "CP Cost",
+      type: "number",
+      group: "content",
+      description:
+        "CyberPoints required to unlock this module. Set to 0 for free modules. Recommended: Beginner=50, Intermediate=100, Advanced=200.",
+      initialValue: 100,
+      validation: (Rule) => [
+        Rule.min(0).error("CP cost cannot be negative"),
+        Rule.integer().error("CP cost must be a whole number"),
+      ],
+    }),
+    defineField({
       name: "description",
       type: "text",
       group: "content",

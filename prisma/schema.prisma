@@ -28,6 +28,8 @@ model UserProfile {
   bio                String?
   country            String?          @default("Ethiopia")
   xpPoints           Int              @default(0)
+  cpBalance          Int              @default(50)
+  // New users get 50 CP welcome bonus
   currentStreak      Int              @default(0)
   longestStreak      Int              @default(0)
   lastActivityAt     DateTime?
@@ -45,6 +47,41 @@ model UserProfile {
   progress           LessonProgress[]
 
   @@map("user_profiles")
+}
+
+model CPTransaction {
+  id          String            @id @default(cuid())
+  userId      String            // Clerk userId
+
+  type        CPTransactionType
+  amount      Int               // CP amount (positive=credit, negative=debit)
+
+  // For purchases
+  packageId   String?           // Which package they bought
+  amountPaid  Float?            // ETB paid
+  currency    String?           @default("ETB")
+  chapaRef    String?           @unique
+
+  // For unlocks
+  moduleId    String?           // Sanity module _id
+  courseId    String?           // Sanity course _id
+
+  description String?
+  createdAt   DateTime          @default(now())
+
+  @@map("cp_transactions")
+}
+
+model ModuleUnlock {
+  id         String   @id @default(cuid())
+  userId     String   // Clerk userId (not profile id)
+  moduleId   String   // Sanity module _id
+  courseId   String   // Sanity course _id
+  cpSpent    Int      // How many CP were spent
+  unlockedAt DateTime @default(now())
+
+  @@unique([userId, moduleId])
+  @@map("module_unlocks")
 }
 
 model Enrollment {
@@ -135,4 +172,12 @@ enum PaymentType {
   COURSE
   CERTIFICATE
   SUBSCRIPTION
+}
+
+enum CPTransactionType {
+  PURCHASE
+  MODULE_UNLOCK
+  WELCOME_BONUS
+  BONUS
+  REFUND
 }
