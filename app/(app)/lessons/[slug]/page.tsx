@@ -6,6 +6,7 @@ import { LessonRightPanel } from "@/components/lessons/LessonRightPanel";
 import { LessonTopBar } from "@/components/lessons/LessonTopBar";
 import { canUserAccessLesson } from "@/lib/course-access";
 import { getLessonProgress } from "@/lib/actions/xp";
+import { prisma } from "@/lib/prisma";
 import { sanityFetch } from "@/sanity/lib/live";
 import { LESSON_BY_SLUG_QUERY } from "@/sanity/lib/queries";
 
@@ -37,7 +38,33 @@ export default async function LessonPage({ params }: LessonPageProps) {
     );
   }
 
+
   const progressData = userId ? await getLessonProgress(lesson._id) : null;
+
+  let completedModuleLessons = 0;
+  if (userId && lesson.moduleId) {
+    const profile = await prisma.userProfile.findUnique({
+      where: { clerkId: userId },
+      select: { id: true },
+    });
+
+    if (profile) {
+      const moduleLessonIds = lesson.courses
+        ?.flatMap((c: any) => c.modules ?? [])
+        .find((m: any) => m._id === lesson.moduleId)
+        ?.lessons?.map((l: any) => l._id) ?? [];
+
+      if (moduleLessonIds.length > 0) {
+        completedModuleLessons = await prisma.lessonProgress.count({
+          where: {
+            userId: profile.id,
+            lessonId: { in: moduleLessonIds },
+            completed: true,
+          },
+        });
+      }
+    }
+  }
 
   return (
     <div data-lesson-page="true" className="dark min-h-screen bg-background text-foreground">
@@ -53,6 +80,9 @@ export default async function LessonPage({ params }: LessonPageProps) {
             lessonDescription={lesson.description}
             courseId={lesson.courseId ?? ""}
             lessonSlug={lesson.slug?.current ?? ""}
+            moduleId={lesson.moduleId ?? ""}
+            totalModuleLessons={lesson.moduleTotalLessons ?? 0}
+            completedModuleLessons={completedModuleLessons}
             initialProgress={progressData}
           />
         </aside>

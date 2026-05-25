@@ -8,16 +8,20 @@ interface ProgressCardProps {
   lessonId: string;
   courseId: string;
   lessonSlug: string;
+  moduleId: string;
+  totalModuleLessons: number;
+  completedModuleLessons: number;
   initialData: {
     isCompleted: boolean;
     lessonsCompleted: number;
   } | null;
 }
 
-export function ProgressCard({ lessonId, courseId, lessonSlug, initialData }: ProgressCardProps) {
+export function ProgressCard({ lessonId, courseId, lessonSlug, moduleId, totalModuleLessons, completedModuleLessons, initialData }: ProgressCardProps) {
   const [isCompleted, setIsCompleted] = useState(initialData?.isCompleted ?? false);
   const [lessonsCompleted, setLessonsCompleted] = useState(initialData?.lessonsCompleted ?? 0);
   const [showXPToast, setShowXPToast] = useState(false);
+  const [moduleLessonsDone, setModuleLessonsDone] = useState(completedModuleLessons);
   const [isPending, startTransition] = useTransition();
 
   return (
@@ -41,12 +45,14 @@ export function ProgressCard({ lessonId, courseId, lessonSlug, initialData }: Pr
             type="button"
             disabled={isPending}
             onClick={() => startTransition(async () => {
-              const result = await markLessonComplete(lessonId, lessonSlug, courseId);
+              const result = await markLessonComplete(lessonId, lessonSlug, courseId, moduleId, totalModuleLessons);
               if (result && "success" in result && result.success) {
                 setIsCompleted(true);
                 setLessonsCompleted((prev) => prev + 1);
                 setShowXPToast(true);
                 setTimeout(() => setShowXPToast(false), 3000);
+                setModuleLessonsDone((prev) => prev + 1);
+                void moduleLessonsDone;
               }
             })}
             className="w-full py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-primary text-background hover:opacity-90 hover:shadow-lg hover:shadow-primary/20 disabled:opacity-40 disabled:cursor-not-allowed"

@@ -6,19 +6,18 @@ interface WeeklyStreakWidgetProps {
   longestStreak: number;
 }
 
-const DAY_LABELS = ["M", "T", "W", "T", "F", "S", "S"];
+const DAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
 
 export function WeeklyStreakWidget({ weeklyActivity, currentStreak, longestStreak }: WeeklyStreakWidgetProps) {
   const last7Days = Array.from({ length: 7 }, (_, i) => {
     const date = new Date();
     date.setDate(date.getDate() - (6 - i));
     const dateStr = date.toISOString().split("T")[0];
-    const dayIndex = date.getDay();
-    const labelIndex = dayIndex === 0 ? 6 : dayIndex - 1;
+    const dayOfWeek = date.getDay();
 
     return {
       dateStr,
-      label: DAY_LABELS[labelIndex],
+      label: DAY_LABELS[dayOfWeek],
       active: weeklyActivity[dateStr] ?? false,
       isToday: i === 6,
     };

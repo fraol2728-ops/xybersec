@@ -307,6 +307,7 @@ export const LESSON_BY_SLUG_QUERY = defineQuery(`*[
   "moduleIsFree": *[_type == "module" && references(^._id)][0].isFree,
   "moduleId": *[_type == "module" && references(^._id)][0]._id,
   "moduleCpCost": *[_type == "module" && references(^._id)][0].cpCost,
+  "moduleTotalLessons": count(*[_type == "module" && references(^._id)][0].lessons[]),
   "courseId": *[_type == "course" && references(*[_type == "module" && references(^._id)][0]._id)][0]._id,
   "courseSlug": *[_type == "course" && references(*[_type == "module" && references(^._id)][0]._id)][0].slug.current,
   "courses": *[_type == "course" && ^._id in modules[]->lessons[]->_id] | order(

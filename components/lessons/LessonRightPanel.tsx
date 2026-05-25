@@ -2,6 +2,7 @@
 
 import { CheckCircle2, Circle, Loader2, Maximize2, Minimize2, Send, Terminal } from "lucide-react";
 import { useEffect, useRef, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { markLessonComplete } from "@/lib/actions/xp";
 
 interface LessonRightPanelProps {
@@ -10,6 +11,9 @@ interface LessonRightPanelProps {
   lessonDescription?: string;
   courseId: string;
   lessonSlug: string;
+  moduleId: string;
+  totalModuleLessons: number;
+  completedModuleLessons: number;
   initialProgress: {
     isCompleted: boolean;
     xpPoints: number;
@@ -31,13 +35,17 @@ const tabs = [
   { id: "lab", label: "LAB", icon: "🧪" },
 ] as const;
 
-export function LessonRightPanel({ lessonId, lessonTitle, lessonDescription, courseId, lessonSlug, initialProgress }: LessonRightPanelProps) {
+export function LessonRightPanel({ lessonId, lessonTitle, lessonDescription, courseId, lessonSlug, moduleId, totalModuleLessons, completedModuleLessons, initialProgress }: LessonRightPanelProps) {
   const [activeTab, setActiveTab] = useState<"progress" | "xp" | "ai" | "lab">("progress");
   const [aiExpanded, setAiExpanded] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [isCompleted, setIsCompleted] = useState(initialProgress?.isCompleted ?? false);
   const [lessonsCompleted, setLessonsCompleted] = useState(initialProgress?.lessonsCompleted ?? 0);
   const [showXPToast, setShowXPToast] = useState(false);
+  const [moduleLessonsDone, setModuleLessonsDone] = useState(completedModuleLessons);
+  const [showModuleComplete, setShowModuleComplete] = useState(false);
+  const [lastXPEarned, setLastXPEarned] = useState(0);
+  const router = useRouter();
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([
     { role: "assistant", content: `Hi! I'm your AI tutor for "${lessonTitle}". Ask me anything about this lesson!` },
@@ -130,12 +138,20 @@ export function LessonRightPanel({ lessonId, lessonTitle, lessonDescription, cou
                 disabled={isPendingProgress}
                 onClick={() =>
                   startProgressTransition(async () => {
-                    const result = await markLessonComplete(lessonId, lessonSlug, courseId);
+                    const result = await markLessonComplete(lessonId, lessonSlug, courseId, moduleId, totalModuleLessons);
                     if (result && "success" in result && result.success) {
                       setIsCompleted(true);
                       setLessonsCompleted((prev) => prev + 1);
                       setShowXPToast(true);
+                      setLastXPEarned(result.xpEarned ?? 0);
                       setTimeout(() => setShowXPToast(false), 3000);
+
+                      const newCompleted = moduleLessonsDone + 1;
+                      setModuleLessonsDone(newCompleted);
+                      if (newCompleted >= totalModuleLessons) {
+                        setShowModuleComplete(true);
+                        setTimeout(() => router.push("/dashboard"), 2000);
+                      }
                     }
                   })
                 }
@@ -276,6 +292,18 @@ export function LessonRightPanel({ lessonId, lessonTitle, lessonDescription, cou
           </div>
         )}
       </div>
+
+      {showModuleComplete && (
+        <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex items-center justify-center">
+          <div className="text-center p-8">
+            <div className="text-6xl mb-4 animate-bounce">🎉</div>
+            <h2 className="text-2xl font-bold text-foreground mb-2">Module Complete!</h2>
+            <p className="text-muted-foreground mb-2">You finished the module.</p>
+            <p className="text-primary font-semibold mb-6">⚡ +{lastXPEarned} XP earned</p>
+            <p className="text-sm text-muted-foreground animate-pulse">Returning to dashboard...</p>
+          </div>
+        </div>
+      )}
 
       {showXPToast && (
         <div className="fixed bottom-6 right-6 z-50 bg-primary text-background px-4 py-3 rounded-xl shadow-xl shadow-primary/30 font-semibold text-sm flex items-center gap-2 animate-bounce">

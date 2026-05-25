@@ -143,7 +143,9 @@ export async function getDashboardData(): Promise<DashboardStats | null> {
     }
 
     const userRank = profile.xpPoints > 0 ? higherRankedCount + 1 : 0;
-    const lastProgress = profile.progress[0] ?? null;
+    const mostRecentProgress = profile.progress[0] ?? null;
+    const activeCourseId = mostRecentProgress?.courseId ?? null;
+    const lastCompletedLessonId = mostRecentProgress?.lessonId ?? null;
     const activeCourseIds = [...new Set(profile.progress.map((p) => p.courseId))];
 
     let activeUnlockedModules: string[] = [];
@@ -166,9 +168,9 @@ export async function getDashboardData(): Promise<DashboardStats | null> {
       longestStreak: profile.longestStreak,
       lessonsCompleted: profile.progress.length,
       enrolledCourseIds: profile.enrollments.map((e) => e.courseId),
-      lastCompletedLessonId: lastProgress?.lessonId ?? null,
+      lastCompletedLessonId,
       userRank,
-      activeCourseId: lastProgress?.courseId ?? null,
+      activeCourseId,
       recentCourseIds: activeCourseIds.slice(0, 3),
       completedLessonIds: profile.progress.map((p) => p.lessonId),
       unlockedModuleIds: activeUnlockedModules,
