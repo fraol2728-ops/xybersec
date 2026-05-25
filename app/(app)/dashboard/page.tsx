@@ -7,6 +7,7 @@ import { DashboardTopBar } from "@/components/dashboard/DashboardTopBar";
 import { WelcomeBanner } from "@/components/dashboard/WelcomeBanner";
 import { StatsRow } from "@/components/dashboard/StatsRow";
 import { ContinueLearningCard } from "@/components/dashboard/ContinueLearningCard";
+import { ActiveModuleLessons } from "@/components/dashboard/ActiveModuleLessons";
 import { MyCoursesSection } from "@/components/dashboard/MyCoursesSection";
 import { ProfileCard } from "@/components/dashboard/ProfileCard";
 import { MiniLeaderboard } from "@/components/dashboard/MiniLeaderboard";
@@ -35,14 +36,32 @@ export default async function DashboardPage() {
       )
     : {};
 
-  const activeCourse = normalizedCourses
-    .filter((c) => dashboardData?.enrolledCourseIds.includes(c._id) || c.tier === "free")
-    .map((c) => ({
-      ...c,
-      ...courseProgressMap[c._id],
-    }))
-    .sort((a, b) => (a.progressPercent ?? 0) - (b.progressPercent ?? 0))
-    .find((c) => (courseProgressMap[c._id]?.progressPercent ?? 0) < 100);
+  const activeCourse = (() => {
+    if (dashboardData?.activeCourseId) {
+      const course = (normalizedCourses ?? []).find((c) => c._id === dashboardData.activeCourseId);
+      if (course) {
+        return {
+          ...course,
+          ...(courseProgressMap[course._id] ?? {
+            completedLessons: 0,
+            progressPercent: 0,
+            totalLessons: course.totalLessons ?? 0,
+          }),
+        };
+      }
+    }
+
+    return (normalizedCourses ?? [])
+      .filter((c) => c.tier === "free")
+      .map((c) => ({
+        ...c,
+        ...(courseProgressMap[c._id] ?? {
+          completedLessons: 0,
+          progressPercent: 0,
+          totalLessons: c.totalLessons ?? 0,
+        }),
+      }))[0] ?? null;
+  })();
 
   return (
     <div className="dark min-h-screen bg-background text-foreground">
@@ -66,13 +85,18 @@ export default async function DashboardPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
           <div className="lg:col-span-2 space-y-6">
-            <ContinueLearningCard activeCourse={activeCourse ?? null} />
-
             <StatsRow
               xpPoints={dashboardData?.xpPoints ?? 0}
               currentStreak={dashboardData?.currentStreak ?? 0}
               lessonsCompleted={dashboardData?.lessonsCompleted ?? 0}
               userRank={dashboardData?.userRank ?? 0}
+            />
+
+            <ContinueLearningCard activeCourse={activeCourse ?? null} />
+
+            <ActiveModuleLessons
+              activeCourse={activeCourse ?? null}
+              completedLessonIds={dashboardData?.completedLessonIds ?? []}
             />
 
             <SkillTracksCard
