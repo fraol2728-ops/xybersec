@@ -40,27 +40,32 @@ export default async function DashboardPage() {
     : {};
 
   const activeCourse = (() => {
+    const allCourses = normalizedCourses ?? [];
+
     if (dashboardData?.activeCourseId) {
-      const found = (normalizedCourses ?? []).find((c: any) => c._id === dashboardData.activeCourseId);
+      const found = allCourses.find((c: any) => c._id === dashboardData.activeCourseId);
       if (found) {
-        const progress = courseProgressMap[found._id];
+        const courseLessonIds = found.modules?.flatMap((m: any) => m.lessons ?? []).map((l: any) => l._id) ?? [];
+        const completedInCourse = (dashboardData?.completedLessonIds ?? []).filter((id) =>
+          courseLessonIds.includes(id),
+        ).length;
+        const totalLessons = found.totalLessons ?? 0;
         return {
           ...found,
-          completedLessons: progress?.completedLessons ?? 0,
-          progressPercent: progress?.progressPercent ?? 0,
-          totalLessons: progress?.totalLessons ?? found.totalLessons ?? 0,
+          completedLessons: completedInCourse,
+          progressPercent: totalLessons > 0 ? Math.round((completedInCourse / totalLessons) * 100) : 0,
+          totalLessons,
         };
       }
     }
 
-    const freeCourse = (normalizedCourses ?? []).find((c: any) => c.tier === "free");
+    const freeCourse = allCourses.find((c: any) => c.tier === "free");
     if (freeCourse) {
-      const progress = courseProgressMap[freeCourse._id];
       return {
         ...freeCourse,
-        completedLessons: progress?.completedLessons ?? 0,
-        progressPercent: progress?.progressPercent ?? 0,
-        totalLessons: progress?.totalLessons ?? freeCourse.totalLessons ?? 0,
+        completedLessons: 0,
+        progressPercent: 0,
+        totalLessons: freeCourse.totalLessons ?? 0,
       };
     }
 
@@ -97,7 +102,10 @@ export default async function DashboardPage() {
               userRank={dashboardData?.userRank ?? 0}
             />
 
-            <ContinueLearningCard activeCourse={activeCourse ?? null} />
+            <ContinueLearningCard
+              activeCourse={activeCourse ?? null}
+              completedLessonIds={dashboardData?.completedLessonIds ?? []}
+            />
 
             <ActiveModuleLessons
               activeCourse={activeCourse ?? null}
