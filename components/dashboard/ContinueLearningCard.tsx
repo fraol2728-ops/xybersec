@@ -42,14 +42,19 @@ export function ContinueLearningCard({ activeCourse }: ContinueLearningCardProps
     );
   }
 
-  const allLessons = activeCourse.modules?.flatMap((m) => m.lessons) ?? [];
-  const nextLesson = allLessons.find((l) => l.slug);
+  const continueHref = (() => {
+    const firstLesson = activeCourse.modules?.flatMap((m) => m.lessons ?? []).find((l) => l.slug);
 
-  const continueHref = nextLesson?.slug
-    ? `/lessons/${nextLesson.slug}`
-    : activeCourse.firstLessonSlug
-      ? `/lessons/${activeCourse.firstLessonSlug}`
-      : `/courses/${activeCourse.slug}`;
+    if (firstLesson?.slug) {
+      return `/lessons/${firstLesson.slug}`;
+    }
+
+    if (activeCourse.firstLessonSlug) {
+      return `/lessons/${activeCourse.firstLessonSlug}`;
+    }
+
+    return `/courses/${activeCourse.slug}`;
+  })();
 
   return (
     <div className="rounded-2xl border border-primary/30 bg-muted p-6 relative overflow-hidden hover:border-primary/50 transition-colors group">

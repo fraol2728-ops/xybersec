@@ -13,6 +13,9 @@ export interface DashboardStats {
   enrolledCourseIds: string[];
   lastCompletedLessonId: string | null;
   userRank: number;
+  activeCourseId: string | null;
+  recentCourseIds: string[];
+  completedLessonIds: string[];
   leaderboard: {
     id: string;
     username: string | null;
@@ -53,7 +56,7 @@ export async function getDashboardData(): Promise<DashboardStats | null> {
         progress: {
           where: { completed: true },
           orderBy: { completedAt: "desc" },
-          select: { lessonId: true, completedAt: true },
+          select: { lessonId: true, courseId: true, completedAt: true },
         },
       },
     });
@@ -140,6 +143,7 @@ export async function getDashboardData(): Promise<DashboardStats | null> {
 
     const userRank = profile.xpPoints > 0 ? higherRankedCount + 1 : 0;
     const lastProgress = profile.progress[0] ?? null;
+    const activeCourseIds = [...new Set(profile.progress.map((p) => p.courseId))];
 
     return {
       username: profile.username,
@@ -150,6 +154,9 @@ export async function getDashboardData(): Promise<DashboardStats | null> {
       enrolledCourseIds: profile.enrollments.map((e) => e.courseId),
       lastCompletedLessonId: lastProgress?.lessonId ?? null,
       userRank,
+      activeCourseId: lastProgress?.courseId ?? null,
+      recentCourseIds: activeCourseIds.slice(0, 3),
+      completedLessonIds: profile.progress.map((p) => p.lessonId),
       leaderboard,
       level: {
         level: levelData.level,
