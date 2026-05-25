@@ -54,15 +54,23 @@ export async function getDashboardData(): Promise<DashboardStats | null> {
           where: { status: "ACTIVE" },
           select: { courseId: true },
         },
-        progress: {
-          where: { completed: true },
-          orderBy: { completedAt: "desc" },
-          select: { lessonId: true, courseId: true, completedAt: true },
-        },
       },
     });
 
     if (!profile) return null;
+
+    const completedProgress = await prisma.lessonProgress.findMany({
+      where: {
+        userId: profile.id,
+        completed: true,
+      },
+      orderBy: { completedAt: "desc" },
+      select: {
+        lessonId: true,
+        courseId: true,
+        completedAt: true,
+      },
+    });
 
     const now = new Date();
     let currentStreak = profile.currentStreak;
@@ -135,26 +143,27 @@ export async function getDashboardData(): Promise<DashboardStats | null> {
       skillProgress[goal] = 0;
     }
 
-    if (userGoals.length > 0 && profile.progress.length > 0) {
-      const progressPerGoal = Math.floor((profile.progress.length * 5) / userGoals.length);
+    if (userGoals.length > 0 && completedProgress.length > 0) {
+      const progressPerGoal = Math.floor((completedProgress.length * 5) / userGoals.length);
       userGoals.forEach((goal) => {
         skillProgress[goal] = Math.min(progressPerGoal, 100);
       });
     }
 
     const userRank = profile.xpPoints > 0 ? higherRankedCount + 1 : 0;
-    const mostRecentProgress = profile.progress[0] ?? null;
-    const activeCourseId = mostRecentProgress?.courseId ?? null;
-    const lastCompletedLessonId = mostRecentProgress?.lessonId ?? null;
-    const activeCourseIds = [...new Set(profile.progress.map((p) => p.courseId))];
+    const activeCourseId = completedProgress[0]?.courseId ?? null;
+    const lastCompletedLessonId = completedProgress[0]?.lessonId ?? null;
+    const completedLessonIds = completedProgress.map((p) => p.lessonId);
+    const recentCourseIds = [...new Set(completedProgress.map((p) => p.courseId))];
+    const lessonsCompleted = completedProgress.length;
 
     let activeUnlockedModules: string[] = [];
 
-    if (activeCourseIds[0]) {
+    if (recentCourseIds[0]) {
       const unlocks = await prisma.moduleUnlock.findMany({
         where: {
           userId,
-          courseId: activeCourseIds[0],
+          courseId: recentCourseIds[0],
         },
         select: { moduleId: true },
       });
@@ -166,13 +175,13 @@ export async function getDashboardData(): Promise<DashboardStats | null> {
       xpPoints: profile.xpPoints,
       currentStreak,
       longestStreak: profile.longestStreak,
-      lessonsCompleted: profile.progress.length,
+      lessonsCompleted,
       enrolledCourseIds: profile.enrollments.map((e) => e.courseId),
       lastCompletedLessonId,
       userRank,
       activeCourseId,
-      recentCourseIds: activeCourseIds.slice(0, 3),
-      completedLessonIds: profile.progress.map((p) => p.lessonId),
+      recentCourseIds,
+      completedLessonIds,
       unlockedModuleIds: activeUnlockedModules,
       leaderboard,
       level: {

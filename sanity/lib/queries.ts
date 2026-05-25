@@ -134,26 +134,13 @@ export const PROGRAMS_CAREER_PATHS_QUERY = defineQuery(`*[
 }`);
 export const DASHBOARD_COURSES_QUERY = defineQuery(`*[
   _type == "course"
-] | order(_createdAt desc) {
+] | order(_createdAt asc) {
   _id,
   title,
-  slug,
   "slug": slug.current,
   description,
   tier,
-  featured,
-  completedBy,
   thumbnail,
-  thumbnail {
-    asset-> {
-      _id,
-      url
-    }
-  },
-  category-> {
-    _id,
-    title
-  },
   "totalLessons": count(modules[]->lessons[]->_id),
   "firstLessonSlug": modules[0]->lessons[0]->slug.current,
   modules[]-> {
@@ -165,12 +152,9 @@ export const DASHBOARD_COURSES_QUERY = defineQuery(`*[
     lessons[]-> {
       _id,
       title,
-      "slug": slug.current,
-      completedBy
+      "slug": slug.current
     }
-  },
-  "moduleCount": count(modules),
-  "lessonCount": count(modules[]->lessons[])
+  }
 }`);
 
 export const COURSES_CATEGORIES_QUERY = defineQuery(`*[

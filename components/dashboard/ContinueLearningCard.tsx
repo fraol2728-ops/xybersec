@@ -21,9 +21,10 @@ interface ActiveCourse {
 
 interface ContinueLearningCardProps {
   activeCourse: ActiveCourse | null;
+  completedLessonIds: string[];
 }
 
-export function ContinueLearningCard({ activeCourse }: ContinueLearningCardProps) {
+export function ContinueLearningCard({ activeCourse, completedLessonIds }: ContinueLearningCardProps) {
   if (!activeCourse) {
     return (
       <div className="rounded-2xl border border-border bg-muted p-6 text-center">
@@ -42,9 +43,17 @@ export function ContinueLearningCard({ activeCourse }: ContinueLearningCardProps
     );
   }
 
-  const continueHref = activeCourse.slug
-    ? `/courses/${activeCourse.slug}`
-    : "/courses";
+  const continueHref = (() => {
+    if (!activeCourse) return "/courses";
+
+    const allLessons = activeCourse.modules?.flatMap((m: any) => m.lessons ?? []) ?? [];
+    const nextLesson = allLessons.find((l: any) => !completedLessonIds.includes(l._id));
+    if (nextLesson?.slug) return `/lessons/${nextLesson.slug}`;
+
+    if (activeCourse.firstLessonSlug) return `/lessons/${activeCourse.firstLessonSlug}`;
+
+    return "/courses";
+  })();
 
   return (
     <div className="rounded-2xl border border-primary/30 bg-muted p-6 relative overflow-hidden hover:border-primary/50 transition-colors group">
