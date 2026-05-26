@@ -18,8 +18,15 @@ export default async function LessonPage({ params }: LessonPageProps) {
   const { data: lesson } = await sanityFetch({ query: LESSON_BY_SLUG_QUERY, params: { slug } });
   if (!lesson) notFound();
 
+
+  const fallbackCourseIdFromCourses = lesson.courses?.find((course: any) =>
+    (course.slug?.current ?? course.slug) === lesson.courseSlug,
+  )?._id ?? lesson.courses?.[0]?._id;
+
+  const resolvedCourseId = lesson.courseId?.trim() || fallbackCourseIdFromCourses || "";
+
   const accessResult = await canUserAccessLesson(
-    lesson.courseId ?? "",
+    resolvedCourseId,
     lesson.moduleId ?? "",
     lesson.moduleIsFree ?? false,
     lesson.moduleCpCost ?? 100,
@@ -30,7 +37,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
       <CPPaywallOverlay
         courseSlug={lesson.courseSlug ?? ""}
         moduleId={lesson.moduleId ?? ""}
-        courseId={lesson.courseId ?? ""}
+        courseId={resolvedCourseId}
         moduleTitle={"This module"}
         cpCost={accessResult.cpCost ?? 100}
         userCPBalance={accessResult.userCPBalance ?? 0}
@@ -78,7 +85,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
             lessonId={lesson._id}
             lessonTitle={lesson.title ?? ""}
             lessonDescription={lesson.description}
-            courseId={lesson.courseId ?? ""}
+            courseId={resolvedCourseId}
             lessonSlug={lesson.slug?.current ?? ""}
             moduleId={lesson.moduleId ?? ""}
             totalModuleLessons={lesson.moduleTotalLessons ?? 0}

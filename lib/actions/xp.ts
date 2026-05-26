@@ -37,6 +37,10 @@ export async function markLessonComplete(
     return { alreadyCompleted: true, xpEarned: 0 };
   }
 
+  if (!courseId?.trim()) {
+    console.warn("markLessonComplete called without valid courseId", { lessonId, lessonSlug, userId });
+  }
+
   await prisma.lessonProgress.upsert({
     where: {
       userId_lessonId: {
