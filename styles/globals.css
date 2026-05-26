@@ -147,3 +147,12 @@ div[role="alertdialog"] {
   display: block;
   width: 3px;
 }
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
