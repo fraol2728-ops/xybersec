@@ -140,8 +140,14 @@ export const DASHBOARD_COURSES_QUERY = defineQuery(`*[
   "slug": slug.current,
   description,
   tier,
-  thumbnail,
-  "totalLessons": count(modules[]->lessons[]->_id),
+  thumbnail {
+    asset-> {
+      url
+    }
+  },
+  "totalLessons": count(
+    modules[]->lessons[]->_id
+  ),
   "firstLessonSlug": modules[0]->lessons[0]->slug.current,
   modules[]-> {
     _id,
@@ -152,7 +158,7 @@ export const DASHBOARD_COURSES_QUERY = defineQuery(`*[
     lessons[]-> {
       _id,
       title,
-      "slug": slug.current
+      "slug": slug.current,
     }
   }
 }`);
