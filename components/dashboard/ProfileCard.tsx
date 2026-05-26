@@ -47,7 +47,7 @@ export function ProfileCard({ username, xpPoints, currentStreak, userRank, first
         <p className="text-xs text-muted-foreground mt-1">{level.xpToNext.toLocaleString()} XP to Level {level.level + 1}</p>
       </div>
 
-      <div className="flex gap-2 justify-center mb-4">
+      <div className="flex gap-2 justify-center">
         <div className="flex-1 bg-background rounded-lg p-2 border border-border">
           <p className="text-sm font-bold text-primary">{xpPoints.toLocaleString()}</p>
           <p className="text-xs text-muted-foreground">XP</p>
@@ -57,8 +57,6 @@ export function ProfileCard({ username, xpPoints, currentStreak, userRank, first
           <p className="text-xs text-muted-foreground">Streak</p>
         </div>
       </div>
-
-      <a href="/dashboard" className="block w-full py-2 rounded-lg border border-border text-sm text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all">View Profile</a>
     </div>
   );
 }

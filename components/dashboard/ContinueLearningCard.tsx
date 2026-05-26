@@ -27,7 +27,7 @@ interface ContinueLearningCardProps {
 export function ContinueLearningCard({ activeCourse, completedLessonIds }: ContinueLearningCardProps) {
   if (!activeCourse) {
     return (
-      <div className="rounded-2xl border border-border bg-muted p-6 text-center">
+      <div className="rounded-2xl border border-border bg-muted p-5 text-center">
         <span className="text-4xl block mb-3">🛡️</span>
         <h3 className="font-semibold text-foreground mb-2">Ready to start learning?</h3>
         <p className="text-sm text-muted-foreground mb-4">
@@ -44,8 +44,6 @@ export function ContinueLearningCard({ activeCourse, completedLessonIds }: Conti
   }
 
   const continueHref = (() => {
-    if (!activeCourse) return "/courses";
-
     const allLessons = activeCourse.modules?.flatMap((m: any) => m.lessons ?? []) ?? [];
     const nextLesson = allLessons.find((l: any) => !completedLessonIds.includes(l._id));
     if (nextLesson?.slug) return `/lessons/${nextLesson.slug}`;
@@ -56,30 +54,19 @@ export function ContinueLearningCard({ activeCourse, completedLessonIds }: Conti
   })();
 
   return (
-    <div className="rounded-2xl border border-primary/30 bg-muted p-6 relative overflow-hidden hover:border-primary/50 transition-colors group">
+    <div className="rounded-2xl border border-primary/30 bg-muted p-5 relative overflow-hidden hover:border-primary/50 transition-colors group">
       <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-secondary" />
 
       <div className="flex items-start justify-between mb-1">
-        <p className="text-xs font-semibold text-primary tracking-wider uppercase flex items-center gap-1.5 mb-3">
-          <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-          Continue Learning
-        </p>
+        <p className="text-xs font-semibold text-primary tracking-wider uppercase mb-3">Continue Learning</p>
         <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">
           {activeCourse.progressPercent}%
         </span>
       </div>
 
-      <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-primary transition-colors">{activeCourse.title}</h3>
+      <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors">{activeCourse.title}</h3>
 
-      <p className="text-sm text-muted-foreground mb-4">
-        {activeCourse.progressPercent === 0
-          ? "Start your first lesson"
-          : activeCourse.progressPercent === 100
-            ? "Course complete! Get your certificate 🎓"
-            : `${activeCourse.completedLessons} of ${activeCourse.totalLessons} lessons completed`}
-      </p>
-
-      <div className="w-full h-2 bg-background rounded-full mb-5 overflow-hidden">
+      <div className="w-full h-2 bg-background rounded-full mb-4 overflow-hidden">
         <div
           className="h-full rounded-full bg-gradient-to-r from-primary to-secondary transition-all duration-700"
           style={{ width: `${activeCourse.progressPercent}%` }}
@@ -88,11 +75,7 @@ export function ContinueLearningCard({ activeCourse, completedLessonIds }: Conti
 
       <div className="flex items-center justify-between">
         <p className="text-xs text-muted-foreground">
-          {activeCourse.progressPercent === 0
-            ? "Start your first lesson"
-            : activeCourse.progressPercent === 100
-              ? "Course complete! Get your certificate 🎓"
-              : `${activeCourse.completedLessons} of ${activeCourse.totalLessons} lessons completed`}
+          {activeCourse.completedLessons} of {activeCourse.totalLessons} lessons completed
         </p>
         <a
           href={continueHref}

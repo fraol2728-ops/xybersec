@@ -53,7 +53,6 @@ export function ActiveModuleLessons({ activeCourse, completedLessonIds, unlocked
       <div className="flex items-center justify-between px-5 py-4 border-b border-border">
         <div>
           <p className="text-xs font-semibold text-muted-foreground tracking-wider uppercase mb-0.5">Current Module</p>
-          <p className="text-xs text-muted-foreground mb-0.5">{activeCourse?.title}</p>
           <h3 className="text-sm font-bold text-foreground">{activeModule?.title ?? "Loading..."}</h3>
         </div>
         <div className="flex items-center gap-2">

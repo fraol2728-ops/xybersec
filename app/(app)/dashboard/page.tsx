@@ -5,16 +5,13 @@ import { sanityFetch } from "@/sanity/lib/live";
 import { DASHBOARD_COURSES_QUERY } from "@/sanity/lib/queries";
 import { DashboardTopBar } from "@/components/dashboard/DashboardTopBar";
 import { WelcomeBanner } from "@/components/dashboard/WelcomeBanner";
-import { StatsRow } from "@/components/dashboard/StatsRow";
 import { ContinueLearningCard } from "@/components/dashboard/ContinueLearningCard";
 import { ActiveModuleLessons } from "@/components/dashboard/ActiveModuleLessons";
 import { MyCoursesSection } from "@/components/dashboard/MyCoursesSection";
 import { ProfileCard } from "@/components/dashboard/ProfileCard";
 import { MiniLeaderboard } from "@/components/dashboard/MiniLeaderboard";
-import { AchievementsCard } from "@/components/dashboard/AchievementsCard";
 import { WeeklyStreakWidget } from "@/components/dashboard/WeeklyStreakWidget";
-import { SkillTracksCard } from "@/components/dashboard/SkillTracksCard";
-import { AIDashboardWidget } from "@/components/dashboard/AIDashboardWidget";
+import { AIFloatingButton } from "@/components/dashboard/AIFloatingButton";
 import { getCPBalance, grantWelcomeBonus } from "@/lib/actions/cp";
 
 export default async function DashboardPage() {
@@ -79,29 +76,22 @@ export default async function DashboardPage() {
         xpPoints={dashboardData?.xpPoints ?? 0}
         currentStreak={dashboardData?.currentStreak ?? 0}
         userRank={dashboardData?.userRank ?? 0}
-        levelTitle={dashboardData?.level.title ?? "Rookie"}
-        firstName={user.firstName ?? ""}
+        levelTitle={dashboardData?.level?.title ?? "Rookie"}
         cpBalance={cpBalance}
+        firstName={user.firstName ?? ""}
       />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
         <WelcomeBanner
           firstName={user.firstName ?? "Hacker"}
           username={dashboardData?.username}
           lessonsCompleted={dashboardData?.lessonsCompleted ?? 0}
           currentStreak={dashboardData?.currentStreak ?? 0}
-          levelTitle={dashboardData?.level.title ?? "Rookie"}
+          levelTitle={dashboardData?.level?.title ?? "Rookie"}
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
           <div className="lg:col-span-2 space-y-6">
-            <StatsRow
-              xpPoints={dashboardData?.xpPoints ?? 0}
-              currentStreak={dashboardData?.currentStreak ?? 0}
-              lessonsCompleted={dashboardData?.lessonsCompleted ?? 0}
-              userRank={dashboardData?.userRank ?? 0}
-            />
-
             <ContinueLearningCard
               activeCourse={activeCourse ?? null}
               completedLessonIds={dashboardData?.completedLessonIds ?? []}
@@ -113,15 +103,10 @@ export default async function DashboardPage() {
               unlockedModuleIds={dashboardData?.unlockedModuleIds ?? []}
             />
 
-            <SkillTracksCard
-              skillProgress={dashboardData?.skillProgress ?? {}}
-              learningGoals={dashboardData?.learningGoals ?? []}
-            />
-
             <MyCoursesSection courses={normalizedCourses} courseProgressMap={courseProgressMap} />
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-5">
             <ProfileCard
               username={dashboardData?.username}
               xpPoints={dashboardData?.xpPoints ?? 0}
@@ -151,17 +136,11 @@ export default async function DashboardPage() {
               students={dashboardData?.leaderboard ?? []}
               currentUsername={dashboardData?.username ?? ""}
             />
-
-            <AIDashboardWidget />
-
-            <AchievementsCard
-              lessonsCompleted={dashboardData?.lessonsCompleted ?? 0}
-              currentStreak={dashboardData?.currentStreak ?? 0}
-              coursesCompleted={Object.values(courseProgressMap).filter((p) => p.progressPercent >= 100).length}
-            />
           </div>
         </div>
       </main>
+
+      <AIFloatingButton />
     </div>
   );
 }
