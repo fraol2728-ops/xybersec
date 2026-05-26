@@ -17,7 +17,11 @@ interface ProfileCardProps {
 
 export function ProfileCard({ username, xpPoints, currentStreak, userRank, firstName, imageUrl, level }: ProfileCardProps) {
   return (
-    <div className="rounded-2xl border border-border bg-muted p-5 text-center">
+    <div className="rounded-2xl border border-primary/20 bg-card/80 cyber-elevated p-5 text-center">
+      <div className="mb-3 flex items-center justify-between border-b border-border/70 pb-2">
+        <p className="text-[11px] uppercase tracking-[0.16em] text-primary/90">User Control Panel</p>
+        <span className="mono-cyber text-[10px] text-muted-foreground">ID VERIFIED</span>
+      </div>
       <div className="relative inline-block mb-3">
         <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-primary/50 bg-background mx-auto">
           {imageUrl ? <img src={imageUrl} alt={firstName} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-2xl bg-muted">👤</div>}
@@ -49,11 +53,11 @@ export function ProfileCard({ username, xpPoints, currentStreak, userRank, first
 
       <div className="flex gap-2 justify-center mb-4">
         <div className="flex-1 bg-background rounded-lg p-2 border border-border">
-          <p className="text-sm font-bold text-primary">{xpPoints.toLocaleString()}</p>
+          <p className="mono-cyber text-sm font-bold text-primary">{xpPoints.toLocaleString()}</p>
           <p className="text-xs text-muted-foreground">XP</p>
         </div>
         <div className="flex-1 bg-background rounded-lg p-2 border border-border">
-          <p className="text-sm font-bold text-orange-400">🔥 {currentStreak}</p>
+          <p className="mono-cyber text-sm font-bold text-orange-400">🔥 {currentStreak}</p>
           <p className="text-xs text-muted-foreground">Streak</p>
         </div>
       </div>

@@ -73,7 +73,7 @@ export default async function DashboardPage() {
   })();
 
   return (
-    <div className="dark min-h-screen bg-background text-foreground">
+    <div className="dark cyber-command-shell min-h-screen bg-background text-foreground">
       <DashboardTopBar
         username={dashboardData?.username}
         xpPoints={dashboardData?.xpPoints ?? 0}

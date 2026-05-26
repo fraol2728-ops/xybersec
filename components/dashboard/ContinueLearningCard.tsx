@@ -56,7 +56,7 @@ export function ContinueLearningCard({ activeCourse, completedLessonIds }: Conti
   })();
 
   return (
-    <div className="rounded-2xl border border-primary/30 bg-muted p-6 relative overflow-hidden hover:border-primary/50 transition-colors group">
+    <div className="rounded-2xl border border-primary/30 bg-card/80 cyber-elevated p-6 relative overflow-hidden hover:border-primary/50 transition-colors group">
       <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-secondary" />
 
       <div className="flex items-start justify-between mb-1">
@@ -79,9 +79,9 @@ export function ContinueLearningCard({ activeCourse, completedLessonIds }: Conti
             : `${activeCourse.completedLessons} of ${activeCourse.totalLessons} lessons completed`}
       </p>
 
-      <div className="w-full h-2 bg-background rounded-full mb-5 overflow-hidden">
+      <div className="w-full h-2 bg-background rounded-full mb-5 overflow-hidden border border-primary/20">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-primary to-secondary transition-all duration-700"
+          className="h-full rounded-full bg-gradient-to-r from-primary via-cyan-300 to-secondary transition-all duration-700 shadow-[0_0_18px_rgba(34,211,238,0.55)]"
           style={{ width: `${activeCourse.progressPercent}%` }}
         />
       </div>
@@ -96,7 +96,7 @@ export function ContinueLearningCard({ activeCourse, completedLessonIds }: Conti
         </p>
         <a
           href={continueHref}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-background text-sm font-semibold hover:opacity-90 hover:shadow-lg hover:shadow-primary/25 transition-all"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-background text-sm font-semibold hover:opacity-90 hover:shadow-lg hover:shadow-primary/40 active:scale-[0.98] transition-all duration-200"
         >
           {activeCourse.progressPercent === 0
             ? "Start Now →"
