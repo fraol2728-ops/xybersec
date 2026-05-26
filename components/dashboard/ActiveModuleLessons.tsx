@@ -49,7 +49,7 @@ export function ActiveModuleLessons({ activeCourse, completedLessonIds, unlocked
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-muted overflow-hidden">
+    <div className="rounded-2xl border border-border bg-card/80 cyber-elevated overflow-hidden">
       <div className="flex items-center justify-between px-5 py-4 border-b border-border">
         <div>
           <p className="text-xs font-semibold text-muted-foreground tracking-wider uppercase mb-0.5">Current Module</p>
@@ -66,8 +66,8 @@ export function ActiveModuleLessons({ activeCourse, completedLessonIds, unlocked
           const isCompleted = completedLessonIds.includes(lesson._id);
           const isNext = !isCompleted && (activeModule?.lessons ?? []).slice(0, index).every((l) => completedLessonIds.includes(l._id));
           return (
-            <a key={lesson._id} href={`/lessons/${lesson.slug}`} className={`flex items-center gap-4 px-5 py-3.5 transition-all hover:bg-background/50 group ${isNext ? "bg-primary/5" : ""}`}>
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold transition-all ${isCompleted ? "bg-primary/20 text-primary border border-primary/40" : isNext ? "bg-primary text-background shadow-lg shadow-primary/30 animate-pulse" : "bg-muted-foreground/10 text-muted-foreground border border-border"}`}>{isCompleted ? "✓" : isNext ? "▶" : index + 1}</div>
+            <a key={lesson._id} href={`/lessons/${lesson.slug}`} className={`flex items-center gap-4 px-5 py-3.5 transition-all duration-300 hover:bg-background/55 hover:-translate-y-0.5 group ${isNext ? "bg-primary/8 border-l-2 border-primary/60 glow-soft" : ""}`}>
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold transition-all ${isCompleted ? "bg-primary/20 text-primary border border-primary/40" : isNext ? "bg-primary text-background shadow-lg shadow-primary/40 animate-pulse" : "bg-muted-foreground/10 text-muted-foreground border border-border"}`}>{isCompleted ? "✓" : isNext ? "▶" : index + 1}</div>
               <div className="flex-1 min-w-0">
                 <p className={`text-sm font-medium truncate transition-colors ${isCompleted ? "text-muted-foreground line-through" : isNext ? "text-primary" : "text-foreground group-hover:text-primary"}`}>{lesson.title}</p>
                 {isNext && <p className="text-xs text-primary/70 mt-0.5">Up next</p>}
