@@ -15,7 +15,7 @@ interface DashboardTopBarProps {
 
 export function DashboardTopBar({ xpPoints, currentStreak, userRank, levelTitle, cpBalance }: DashboardTopBarProps) {
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 h-16 bg-background/95 backdrop-blur-md border-b border-border">
+    <div className="fixed top-0 left-0 right-0 z-50 h-16 border-b border-border/70 bg-background/90 backdrop-blur-xl cyber-grid-overlay">
       <div className="max-w-7xl mx-auto h-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center gap-2">
@@ -31,7 +31,7 @@ export function DashboardTopBar({ xpPoints, currentStreak, userRank, levelTitle,
               <Link
                 key={link.href}
                 href={link.href}
-                className="px-3 py-1.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+                className="rounded-lg px-3 py-1.5 text-sm text-muted-foreground transition-all duration-300 hover:bg-primary/10 hover:text-primary hover:glow-soft"
               >
                 {link.label}
               </Link>
@@ -42,7 +42,7 @@ export function DashboardTopBar({ xpPoints, currentStreak, userRank, levelTitle,
         <div className="hidden sm:flex items-center gap-2">
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted border border-border">
             <span className="text-sm">⚡</span>
-            <span className="text-xs font-bold text-primary">{xpPoints.toLocaleString()} XP</span>
+            <span className="mono-cyber text-xs font-bold text-primary">{xpPoints.toLocaleString()} XP</span>
           </div>
 
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted border border-border">
@@ -58,13 +58,13 @@ export function DashboardTopBar({ xpPoints, currentStreak, userRank, levelTitle,
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-colors"
           >
             <Zap className="w-3.5 h-3.5 text-primary" />
-            <span className="text-xs font-bold text-primary">{cpBalance} CP</span>
+            <span className="mono-cyber text-xs font-bold text-primary">{cpBalance} CP</span>
           </Link>
 
           {userRank > 0 && (
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20">
               <span className="text-sm">🇪🇹</span>
-              <span className="text-xs font-bold text-primary">#{userRank} Ethiopia</span>
+              <span className="mono-cyber text-xs font-bold text-primary">#{userRank} Ethiopia</span>
             </div>
           )}
         </div>

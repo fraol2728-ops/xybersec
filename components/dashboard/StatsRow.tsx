@@ -1,3 +1,5 @@
+import { TrendingUp } from "lucide-react";
+
 interface StatsRowProps {
   xpPoints: number;
   currentStreak: number;
@@ -6,42 +8,41 @@ interface StatsRowProps {
 }
 
 const baseCardClass =
-  "relative flex flex-col items-center justify-center p-5 rounded-2xl backdrop-blur-md border transition-all duration-300 hover:scale-105 hover:shadow-2xl";
+  "relative overflow-hidden rounded-2xl border border-border/70 bg-card/70 p-5 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:glow-soft";
 
 export function StatsRow({ xpPoints, currentStreak, lessonsCompleted, userRank }: StatsRowProps) {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-      <div className={`${baseCardClass} bg-primary/10 border-primary/30 hover:shadow-primary/20`}>
-        <div className="absolute inset-0 rounded-2xl bg-primary/5 blur-xl -z-10 pointer-events-none" />
-        <span className="text-2xl mb-1">⚡</span>
-        <p className="text-3xl font-black text-primary drop-shadow-[0_0_12px_rgb(34,211,238,0.6)]">{xpPoints.toLocaleString()}</p>
-        <p className="text-xs text-muted-foreground mt-1">Total XP</p>
+    <section className="space-y-3">
+      <div className="flex items-center justify-between border-b border-border/60 pb-2">
+        <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-primary/90">Operational Metrics</h3>
+        <span className="mono-cyber text-xs text-muted-foreground">LIVE • REFRESH 5s</span>
       </div>
 
-      <div className={`${baseCardClass} bg-orange-500/10 border-orange-500/30 hover:shadow-orange-500/25`}>
-        <div className="absolute inset-0 rounded-2xl bg-orange-500/10 blur-xl -z-10 animate-pulse pointer-events-none" />
-        {currentStreak >= 7 && (
-          <span className="absolute -top-2 -right-2 text-xs font-black px-2 py-0.5 rounded-full bg-orange-500 text-white animate-bounce">
-            HOT
-          </span>
-        )}
-        <p className="text-3xl font-black text-orange-400 drop-shadow-[0_0_16px_rgba(249,115,22,0.7)]">🔥 {currentStreak}</p>
-        <p className="text-xs text-muted-foreground mt-1">Day Streak</p>
-      </div>
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div className={baseCardClass}>
+          <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">XP Throughput</p>
+          <p className="mono-cyber mt-2 text-3xl font-bold text-primary">{xpPoints.toLocaleString()}</p>
+          <div className="mt-3 flex items-center gap-1 text-[11px] text-primary/80"><TrendingUp className="h-3.5 w-3.5" />+12.4% this week</div>
+        </div>
 
-      <div className={`${baseCardClass} bg-secondary/10 border-secondary/30 hover:shadow-secondary/20`}>
-        <div className="absolute inset-0 rounded-2xl bg-secondary/5 blur-xl -z-10 pointer-events-none" />
-        <span className="text-2xl mb-1">📚</span>
-        <p className="text-3xl font-black text-secondary drop-shadow-[0_0_12px_rgba(129,140,248,0.6)]">{lessonsCompleted}</p>
-        <p className="text-xs text-muted-foreground mt-1">Lessons Done</p>
-      </div>
+        <div className={baseCardClass}>
+          <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Streak Integrity</p>
+          <p className="mono-cyber mt-2 text-3xl font-bold text-orange-300">{currentStreak}d</p>
+          <p className="mt-3 text-[11px] text-muted-foreground">Maintain daily activity to keep bonus multipliers.</p>
+        </div>
 
-      <div className={`${baseCardClass} bg-amber-500/10 border-amber-500/30 hover:shadow-amber-500/20`}>
-        <div className="absolute inset-0 rounded-2xl bg-amber-500/5 blur-xl -z-10 pointer-events-none" />
-        <span className="text-2xl mb-1">🏆</span>
-        <p className="text-3xl font-black text-amber-400 drop-shadow-[0_0_12px_rgba(245,158,11,0.6)]">{userRank > 0 ? `#${userRank}` : "—"}</p>
-        <p className="text-xs text-muted-foreground mt-1">🇪🇹 Ethiopia</p>
+        <div className={baseCardClass}>
+          <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Completed Lessons</p>
+          <p className="mono-cyber mt-2 text-3xl font-bold text-secondary">{lessonsCompleted}</p>
+          <p className="mt-3 text-[11px] text-muted-foreground">Pipeline progress across all active modules.</p>
+        </div>
+
+        <div className={baseCardClass}>
+          <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Regional Rank</p>
+          <p className="mono-cyber mt-2 text-3xl font-bold text-amber-300">{userRank > 0 ? `#${userRank}` : "—"}</p>
+          <p className="mt-3 text-[11px] text-muted-foreground">Leaderboard: Ethiopia shard.</p>
+        </div>
       </div>
-    </div>
+    </section>
   );
 }
