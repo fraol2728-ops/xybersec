@@ -14,7 +14,6 @@ import { MiniLeaderboard } from "@/components/dashboard/MiniLeaderboard";
 import { AchievementsCard } from "@/components/dashboard/AchievementsCard";
 import { WeeklyStreakWidget } from "@/components/dashboard/WeeklyStreakWidget";
 import { SkillTracksCard } from "@/components/dashboard/SkillTracksCard";
-import { AIDashboardWidget } from "@/components/dashboard/AIDashboardWidget";
 import { getCPBalance, grantWelcomeBonus } from "@/lib/actions/cp";
 
 export default async function DashboardPage() {
@@ -113,12 +112,14 @@ export default async function DashboardPage() {
               unlockedModuleIds={dashboardData?.unlockedModuleIds ?? []}
             />
 
-            <SkillTracksCard
-              skillProgress={dashboardData?.skillProgress ?? {}}
-              learningGoals={dashboardData?.learningGoals ?? []}
-            />
-
             <MyCoursesSection courses={normalizedCourses} courseProgressMap={courseProgressMap} />
+
+            {/* MOVED: Achievements from right column to left column, now below learning modules/courses */}
+            <AchievementsCard
+              lessonsCompleted={dashboardData?.lessonsCompleted ?? 0}
+              currentStreak={dashboardData?.currentStreak ?? 0}
+              coursesCompleted={Object.values(courseProgressMap).filter((p) => p.progressPercent >= 100).length}
+            />
           </div>
 
           <div className="space-y-6">
@@ -152,13 +153,14 @@ export default async function DashboardPage() {
               currentUsername={dashboardData?.username ?? ""}
             />
 
-            <AIDashboardWidget />
-
-            <AchievementsCard
-              lessonsCompleted={dashboardData?.lessonsCompleted ?? 0}
-              currentStreak={dashboardData?.currentStreak ?? 0}
-              coursesCompleted={Object.values(courseProgressMap).filter((p) => p.progressPercent >= 100).length}
+            {/* MOVED: Skill Tracks from left column to right column (replacing AI Terminal position) */}
+            <SkillTracksCard
+              skillProgress={dashboardData?.skillProgress ?? {}}
+              learningGoals={dashboardData?.learningGoals ?? []}
             />
+
+            {/* REMOVED FROM LAYOUT: AI Terminal intentionally omitted per requested structure */}
+            {/* <AIDashboardWidget /> */}
           </div>
         </div>
       </main>
