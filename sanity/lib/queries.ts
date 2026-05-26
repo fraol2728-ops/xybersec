@@ -21,24 +21,34 @@ export const FEATURED_COURSES_QUERY = defineQuery(`*[
   "lessonCount": count(modules[]->lessons[])
 }`);
 
-export const ALL_COURSES_QUERY = defineQuery(`*[
-  _type == "course"
-] | order(_createdAt desc) {
-  _id,
-  title,
-  slug,
-  description,
-  tier,
-  featured,
-  thumbnail {
-    asset-> {
+export const ALL_COURSES_QUERY = groq`
+  *[_type == "course"] | order(_createdAt asc) {
+    _id,
+    title,
+    "slug": slug.current,
+    description,
+    tier,
+    thumbnail {
+      asset-> { url }
+    },
+    category-> {
       _id,
-      url
-    }
-  },
-  "moduleCount": count(modules),
-  "lessonCount": count(modules[]->lessons[])
-}`);
+      title,
+      "slug": slug.current,
+      icon
+    },
+    "totalLessons": count(
+      modules[]->lessons[]->_id
+    ),
+    "totalModules": count(modules[]),
+    "estimatedHours": round(
+      count(modules[]->lessons[]->_id) * 15 / 60
+    ),
+    "firstLessonSlug":
+      modules[0]->lessons[0]->slug.current,
+    featured,
+  }
+`;
 
 export const COURSE_BY_ID_QUERY = defineQuery(`*[
   _type == "course"
@@ -169,6 +179,16 @@ export const COURSES_CATEGORIES_QUERY = defineQuery(`*[
   _id,
   title
 }`);
+
+export const ALL_CATEGORIES_QUERY = groq`
+  *[_type == "category"] | order(title asc) {
+    _id,
+    title,
+    "slug": slug.current,
+    icon,
+    description
+  }
+`;
 
 export const COURSE_WITH_MODULES_QUERY = defineQuery(`*[
   _type == "course"
