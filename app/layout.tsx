@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import { StructuredData } from "@/components/seo/StructuredData";
 import { LanguageProvider } from "@/context/language";
 import { siteConfig } from "@/lib/seo";
-import "../styles/globals.css";
+import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
 
