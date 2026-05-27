@@ -2,6 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import { sendCourseCompleteEmail, sendModuleCompleteEmail } from "@/lib/actions/send-emails";
 import { prisma } from "@/lib/prisma";
 import { getLevelFromXP } from "@/lib/levels";
 
@@ -11,11 +12,10 @@ export async function markLessonComplete(
   lessonId: string,
   lessonSlug: string,
   courseId: string,
-  moduleId: string,
-  totalLessonsInModule: number,
+  moduleId?: string,
+  totalModuleLessons?: number,
+  totalCourseLessons?: number,
 ) {
-  void moduleId;
-  void totalLessonsInModule;
   const { userId } = await auth();
   if (!userId) return { error: "Not authenticated" };
 
@@ -113,6 +113,26 @@ export async function markLessonComplete(
       level: getLevelFromXP(updatedProfile.xpPoints).level,
     },
   });
+
+
+
+  if (moduleId && totalModuleLessons) {
+    const completedInModule = await prisma.lessonProgress.count({
+      where: { userId: profile.id, courseId, completed: true },
+    });
+    if (completedInModule >= totalModuleLessons) {
+      sendModuleCompleteEmail(userId, moduleId, courseId, XP_PER_LESSON).catch(console.error);
+    }
+  }
+
+  if (totalCourseLessons) {
+    const completedInCourse = await prisma.lessonProgress.count({
+      where: { userId: profile.id, courseId, completed: true },
+    });
+    if (completedInCourse >= totalCourseLessons) {
+      sendCourseCompleteEmail(userId, courseId, totalCourseLessons).catch(console.error);
+    }
+  }
 
   revalidatePath(`/lessons/${lessonSlug}`);
   revalidatePath("/dashboard");

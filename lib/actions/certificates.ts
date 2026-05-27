@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { CP_COSTS } from "@/lib/cp-packages";
+import { sendCertificateIssuedEmail } from "@/lib/actions/send-emails";
 
 export async function checkCertificateEligibility(courseId: string, totalLessons: number): Promise<{
   eligible: boolean;
@@ -109,6 +110,8 @@ export async function claimCertificateWithCP(courseId: string, courseTitle: stri
       },
     }),
   ]);
+
+  sendCertificateIssuedEmail(userId, certCode, courseId).catch(console.error);
 
   revalidatePath("/dashboard");
   revalidatePath(`/certificate/${certCode}`);
