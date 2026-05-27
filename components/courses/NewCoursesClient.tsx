@@ -278,9 +278,18 @@ export function NewCoursesClient({ courses, categories }: NewCoursesClientProps)
 }
 
 function CourseCardNew({ course }: { course: any }) {
+  const categoryTitle =
+    typeof course?.category?.title === "string" ? course.category.title : "";
+  const courseSlug =
+    typeof course?.slug === "string"
+      ? course.slug
+      : typeof course?.slug?.current === "string"
+        ? course.slug.current
+        : "";
+
   return (
     <Link
-      href={`/courses/${course.slug}`}
+      href={courseSlug ? `/courses/${courseSlug}` : "/courses"}
       className="group flex flex-col rounded-2xl border border-border bg-muted overflow-hidden hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 h-full"
     >
       <div className="relative aspect-video bg-background overflow-hidden">
@@ -324,9 +333,9 @@ function CourseCardNew({ course }: { course: any }) {
       </div>
 
       <div className="flex flex-col flex-1 p-5">
-        {course.category?.title && (
+        {categoryTitle && (
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-            {course.category.title}
+            {categoryTitle}
           </p>
         )}
         <h3 className="text-base font-bold text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
