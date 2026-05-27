@@ -4,6 +4,8 @@ import { CourseHeroSection } from "@/components/courses/CourseHeroSection";
 import { CourseModuleList } from "@/components/courses/CourseModuleList";
 import { CourseSidebar } from "@/components/courses/CourseSidebar";
 import { checkModuleUnlocks, getCPBalance } from "@/lib/actions/cp";
+import { checkCertificateEligibility } from "@/lib/actions/certificates";
+import { CertificateClaimCard } from "@/components/certificate/CertificateClaimCard";
 import { getUserCourseAccess } from "@/lib/course-access";
 import { sanityFetch } from "@/sanity/lib/live";
 import { COURSE_WITH_MODULES_QUERY } from "@/sanity/lib/queries";
@@ -27,9 +29,12 @@ export default async function CoursePage({
 
   const moduleIds = course.modules?.map((m: any) => m._id) ?? [];
 
-  const [unlockedModules, cpBalance] = await Promise.all([
+  const totalLessons = course.totalLessons ?? 0;
+
+  const [unlockedModules, cpBalance, eligibility] = await Promise.all([
     moduleIds.length > 0 ? checkModuleUnlocks(moduleIds) : Promise.resolve({}),
     getCPBalance(),
+    userId ? checkCertificateEligibility(course._id, totalLessons) : Promise.resolve(null),
   ]);
 
   return (
@@ -54,6 +59,14 @@ export default async function CoursePage({
 
           <div className="lg:col-span-1">
             <CourseSidebar course={course} cpBalance={cpBalance} />
+            <CertificateClaimCard
+              courseId={course._id}
+              courseTitle={course.title ?? ""}
+              totalLessons={totalLessons}
+              completedLessons={eligibility?.completedLessons ?? 0}
+              cpBalance={cpBalance}
+              existingCertificate={eligibility?.certificate ?? null}
+            />
           </div>
         </div>
       </div>

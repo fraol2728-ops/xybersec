@@ -132,6 +132,7 @@ model Certificate {
   // Payment for cert
   paid            Boolean     @default(false)
   paymentId       String?
+  paymentType     String?     @default("cp")
 
   user            UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
 
