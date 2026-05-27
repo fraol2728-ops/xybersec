@@ -43,17 +43,15 @@ export function ContinueLearningCard({ activeCourse, completedLessonIds }: Conti
     );
   }
 
-  const continueHref = (() => {
-    if (!activeCourse) return "/courses";
+  const continueHref = activeCourse?.slug ? `/courses/${activeCourse.slug}` : "/courses";
 
-    const allLessons = activeCourse.modules?.flatMap((m: any) => m.lessons ?? []) ?? [];
-    const nextLesson = allLessons.find((l: any) => !completedLessonIds.includes(l._id));
-    if (nextLesson?.slug) return `/lessons/${nextLesson.slug}`;
-
-    if (activeCourse.firstLessonSlug) return `/lessons/${activeCourse.firstLessonSlug}`;
-
-    return "/courses";
-  })();
+  const allLessons = activeCourse.modules?.flatMap((m: any) => m.lessons ?? []) ?? [];
+  const nextLesson = allLessons.find((l: any) => !completedLessonIds.includes(l._id));
+  const jumpToLastLessonHref = nextLesson?.slug
+    ? `/lessons/${nextLesson.slug}`
+    : activeCourse.firstLessonSlug
+      ? `/lessons/${activeCourse.firstLessonSlug}`
+      : null;
 
   return (
     <div className="rounded-2xl border border-primary/30 bg-card/80 cyber-elevated p-6 relative overflow-hidden hover:border-primary/50 transition-colors group">
@@ -94,16 +92,23 @@ export function ContinueLearningCard({ activeCourse, completedLessonIds }: Conti
               ? "Course complete! Get your certificate 🎓"
               : `${activeCourse.completedLessons} of ${activeCourse.totalLessons} lessons completed`}
         </p>
-        <a
-          href={continueHref}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-background text-sm font-semibold hover:opacity-90 hover:shadow-lg hover:shadow-primary/40 active:scale-[0.98] transition-all duration-200"
-        >
-          {activeCourse.progressPercent === 0
-            ? "Start Now →"
-            : activeCourse.progressPercent === 100
-              ? "Review Course →"
-              : "Continue →"}
-        </a>
+        <div className="flex flex-col items-end gap-1">
+          <a
+            href={continueHref}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-background text-sm font-semibold hover:opacity-90 hover:shadow-lg hover:shadow-primary/40 active:scale-[0.98] transition-all duration-200"
+          >
+            {activeCourse.progressPercent === 0
+              ? "Start Now →"
+              : activeCourse.progressPercent === 100
+                ? "Review Course →"
+                : "Continue →"}
+          </a>
+          {jumpToLastLessonHref && (
+            <a href={jumpToLastLessonHref} className="text-xs text-primary hover:opacity-80 transition-opacity">
+              Jump to last lesson →
+            </a>
+          )}
+        </div>
       </div>
     </div>
   );
