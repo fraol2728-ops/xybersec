@@ -21,24 +21,32 @@ export const FEATURED_COURSES_QUERY = defineQuery(`*[
   "lessonCount": count(modules[]->lessons[])
 }`);
 
-export const ALL_COURSES_QUERY = defineQuery(`*[
-  _type == "course"
-] | order(_createdAt desc) {
-  _id,
-  title,
-  slug,
-  description,
-  tier,
-  featured,
-  thumbnail {
-    asset-> {
+export const ALL_COURSES_QUERY = defineQuery(`
+  *[_type == "course"] | order(_createdAt asc) {
+    _id,
+    title,
+    "slug": slug.current,
+    description,
+    tier,
+    featured,
+    thumbnail {
+      asset-> {
+        _id,
+        url
+      }
+    },
+    category-> {
       _id,
-      url
-    }
-  },
-  "moduleCount": count(modules),
-  "lessonCount": count(modules[]->lessons[])
-}`);
+      title,
+      icon
+    },
+    "moduleCount": count(modules),
+    "lessonCount": count(modules[]->lessons[]),
+    "estimatedHours": round(
+      count(modules[]->lessons[]) * 15 / 60
+    )
+  }
+`);
 
 export const COURSE_BY_ID_QUERY = defineQuery(`*[
   _type == "course"
@@ -163,6 +171,15 @@ export const DASHBOARD_COURSES_QUERY = defineQuery(`*[
   }
 }`);
 
+
+export const ALL_CATEGORIES_QUERY = defineQuery(`
+  *[_type == "category"] | order(title asc) {
+    _id,
+    title,
+    icon,
+    description
+  }
+`);
 export const COURSES_CATEGORIES_QUERY = defineQuery(`*[
   _type == "category"
 ] | order(title asc) {
