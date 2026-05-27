@@ -2,6 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import { sendWelcomeEmail } from "@/lib/actions/send-emails";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 
@@ -120,6 +121,8 @@ export async function saveOnboardingStep3(learningGoals: string[]) {
     maxAge: 60 * 60 * 24 * 365,
     path: "/",
   });
+
+  sendWelcomeEmail(userId).catch(console.error);
 
   revalidatePath("/onboarding/step-3");
   return { success: true };

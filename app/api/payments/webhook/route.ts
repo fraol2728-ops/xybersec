@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyPayment } from "@/lib/chapa";
 import { prisma } from "@/lib/prisma";
+import { sendCPPurchaseEmail } from "@/lib/actions/send-emails";
+import { CP_PACKAGES } from "@/lib/cp-packages";
 
 export const runtime = "nodejs";
 
@@ -34,6 +36,7 @@ export async function POST(req: NextRequest) {
             currency: payment.currency,
           },
         });
+
       }
     }
 
@@ -55,6 +58,9 @@ export async function POST(req: NextRequest) {
             },
           },
         });
+
+        const pkg = CP_PACKAGES.find((p) => p.id === cpTransaction.packageId);
+        sendCPPurchaseEmail(cpTransaction.userId, cpTransaction.amount, pkg?.name ?? "CyberPoints", cpTransaction.amountPaid ?? 0).catch(console.error);
       }
     }
 
