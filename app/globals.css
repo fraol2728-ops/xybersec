@@ -183,6 +183,18 @@ html {
     box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.24), 0 0 18px rgba(34, 211, 238, 0.18);
   }
 
+  .metric-icon-glow {
+    box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.14), 0 0 16px rgba(34, 211, 238, 0.18);
+  }
+
+  .metric-icon-glow-boost {
+    box-shadow: 0 0 0 1px rgba(125, 211, 252, 0.3), 0 0 22px rgba(34, 211, 238, 0.35);
+  }
+
+  .metric-icon-float {
+    animation: metricIconFloat 4s ease-in-out infinite;
+  }
+
   .glow-strong {
     box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.45), 0 0 30px rgba(34, 211, 238, 0.32);
   }
@@ -214,4 +226,10 @@ html {
 @keyframes glowPulse {
   0%, 100% { text-shadow: 0 0 0 rgba(34, 211, 238, 0); }
   50% { text-shadow: 0 0 12px rgba(34, 211, 238, 0.4); }
+}
+
+@keyframes metricIconFloat {
+  0%,
+  100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-2px) scale(1.04); }
 }
