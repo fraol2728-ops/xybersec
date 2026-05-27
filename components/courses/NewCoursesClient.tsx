@@ -10,7 +10,37 @@ interface NewCoursesClientProps {
   categories: any[];
 }
 
-export function NewCoursesClient({ courses, categories }: NewCoursesClientProps) {
+function getDescriptionText(description: unknown): string {
+  if (typeof description === "string") return description;
+
+  if (Array.isArray(description)) {
+    return description
+      .flatMap((block) => {
+        if (!block || typeof block !== "object") return [];
+        const children = (block as { children?: unknown }).children;
+        if (!Array.isArray(children)) return [];
+        return children
+          .map((child) =>
+            child && typeof child === "object" && "text" in child
+              ? (child as { text?: unknown }).text
+              : "",
+          )
+          .filter(
+            (text): text is string =>
+              typeof text === "string" && text.length > 0,
+          );
+      })
+      .join(" ")
+      .trim();
+  }
+
+  return "";
+}
+
+export function NewCoursesClient({
+  courses,
+  categories,
+}: NewCoursesClientProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedTier, setSelectedTier] = useState("all");
@@ -45,7 +75,7 @@ export function NewCoursesClient({ courses, categories }: NewCoursesClientProps)
       r = r.filter(
         (c) =>
           c.title?.toLowerCase().includes(q) ||
-          c.description?.toLowerCase().includes(q) ||
+          getDescriptionText(c.description).toLowerCase().includes(q) ||
           c.category?.title?.toLowerCase().includes(q),
       );
     }
@@ -242,7 +272,9 @@ export function NewCoursesClient({ courses, categories }: NewCoursesClientProps)
             <div className="w-20 h-20 rounded-2xl bg-muted border border-border flex items-center justify-center mb-5">
               <Search className="w-8 h-8 text-muted-foreground opacity-50" />
             </div>
-            <h3 className="text-lg font-bold text-foreground mb-2">No courses found</h3>
+            <h3 className="text-lg font-bold text-foreground mb-2">
+              No courses found
+            </h3>
             <p className="text-sm text-muted-foreground mb-5">
               Try different search terms or filters
             </p>
@@ -258,7 +290,10 @@ export function NewCoursesClient({ courses, categories }: NewCoursesClientProps)
             </button>
           </motion.div>
         ) : (
-          <motion.div key="grid" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <motion.div
+            key="grid"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+          >
             {filtered.map((course, i) => (
               <motion.div
                 key={course._id}
@@ -333,7 +368,7 @@ function CourseCardNew({ course }: { course: any }) {
           {course.title}
         </h3>
         <p className="text-sm text-muted-foreground line-clamp-2 mb-4 flex-1">
-          {course.description}
+          {getDescriptionText(course.description)}
         </p>
         <div className="flex items-center justify-between pt-3 border-t border-border">
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
