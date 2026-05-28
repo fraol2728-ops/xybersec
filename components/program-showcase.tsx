@@ -44,7 +44,8 @@ export function ProgramShowcase({
     "Hands-on cybersecurity training built for practical growth.";
   const level =
     program.level ?? (program.tier ? tierToLevel[program.tier] : "All Levels");
-  const category = program.category ?? "Cybersecurity";
+  const categoryName =
+    typeof program.category === "string" ? program.category : "Cybersecurity";
   const imageUrl = program.image ?? program.thumbnail?.asset?.url;
   const descriptionPoints = description
     .split(".")
@@ -109,7 +110,7 @@ export function ProgramShowcase({
               variant="secondary"
               className="border border-cyan-400/30 bg-cyan-500/15 px-3 py-1 text-cyan-200"
             >
-              {category}
+              {categoryName}
             </Badge>
           </div>
           <Button

@@ -13,19 +13,35 @@ export async function CoursesPageContent() {
     slug:
       typeof course.slug === "string"
         ? course.slug
-        : course.slug?.current ?? "",
-    category: course.category ?? null,
+        : (course.slug?.current ?? ""),
+    categoryTitle: course.category?.title ?? null,
+    categoryId: course.category?._id ?? null,
+    categoryIcon:
+      typeof course.category?.icon === "string" ? course.category.icon : null,
+    category: {
+      _id: course.category?._id ?? "",
+      title: course.category?.title ?? "",
+      icon:
+        typeof course.category?.icon === "string" ? course.category.icon : "",
+    },
     thumbnail: course.thumbnail ?? null,
     lessonCount: course.lessonCount ?? 0,
     estimatedHours: course.estimatedHours ?? 0,
     totalLessons: course.totalLessons ?? 0,
   }));
 
+  const normalizedCategories = (categories ?? []).map((cat: any) => ({
+    _id: cat._id ?? "",
+    title: cat.title ?? "",
+    icon: typeof cat.icon === "string" ? cat.icon : "",
+    description: cat.description ?? "",
+  }));
+
   return (
     <div className="dark min-h-screen bg-background text-foreground">
       <NewCoursesClient
         courses={normalizedCourses}
-        categories={categories ?? []}
+        categories={normalizedCategories}
       />
     </div>
   );
