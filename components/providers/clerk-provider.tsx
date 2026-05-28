@@ -9,8 +9,8 @@ export function ClientClerkProvider({
 }) {
   return (
     <ClerkProvider
-      afterSignUpUrl="/onboarding"
-      afterSignInUrl="/dashboard"
+      signUpForceRedirectUrl="/onboarding"
+      signInFallbackRedirectUrl="/dashboard"
       afterSignOutUrl="/"
     >
       {children}

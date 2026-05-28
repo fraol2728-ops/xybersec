@@ -167,7 +167,7 @@ export function NewCoursesClient({ courses, categories }: NewCoursesClientProps)
                 : "bg-muted border border-border text-muted-foreground hover:text-foreground hover:border-primary/40"
             }`}
           >
-            {cat.title}
+            {typeof cat.title === "string" ? cat.title : "Untitled Category"}
           </button>
         ))}
       </div>
@@ -230,7 +230,7 @@ export function NewCoursesClient({ courses, categories }: NewCoursesClientProps)
         {searchQuery && ` for "${searchQuery}"`}
       </p>
 
-      <AnimatePresence mode="popLayout">
+      <AnimatePresence mode="popLayout" initial={false}>
         {filtered.length === 0 ? (
           <motion.div
             key="empty"
