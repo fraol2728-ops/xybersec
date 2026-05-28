@@ -8,9 +8,25 @@ export async function CoursesPageContent() {
     sanityFetch({ query: ALL_CATEGORIES_QUERY }),
   ]);
 
+  const normalizedCourses = (courses ?? []).map((course: any) => ({
+    ...course,
+    slug:
+      typeof course.slug === "string"
+        ? course.slug
+        : course.slug?.current ?? "",
+    category: course.category ?? null,
+    thumbnail: course.thumbnail ?? null,
+    lessonCount: course.lessonCount ?? 0,
+    estimatedHours: course.estimatedHours ?? 0,
+    totalLessons: course.totalLessons ?? 0,
+  }));
+
   return (
     <div className="dark min-h-screen bg-background text-foreground">
-      <NewCoursesClient courses={courses ?? []} categories={categories ?? []} />
+      <NewCoursesClient
+        courses={normalizedCourses}
+        categories={categories ?? []}
+      />
     </div>
   );
 }
