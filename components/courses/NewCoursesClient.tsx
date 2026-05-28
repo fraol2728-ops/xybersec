@@ -10,7 +10,21 @@ interface NewCoursesClientProps {
   categories: any[];
 }
 
-export function NewCoursesClient({ courses, categories }: NewCoursesClientProps) {
+const getCategoryEmoji = (title: string): string => {
+  const t = title.toLowerCase();
+  if (t.includes("cyber") || t.includes("security")) return "🛡️";
+  if (t.includes("network")) return "🔌";
+  if (t.includes("linux") || t.includes("os")) return "💻";
+  if (t.includes("web")) return "🌐";
+  if (t.includes("forensic")) return "🔍";
+  if (t.includes("malware")) return "🦠";
+  return "📚";
+};
+
+export function NewCoursesClient({
+  courses,
+  categories,
+}: NewCoursesClientProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedTier, setSelectedTier] = useState("all");
@@ -46,12 +60,15 @@ export function NewCoursesClient({ courses, categories }: NewCoursesClientProps)
         (c) =>
           c.title?.toLowerCase().includes(q) ||
           c.description?.toLowerCase().includes(q) ||
+          c.categoryTitle?.toLowerCase().includes(q) ||
           c.category?.title?.toLowerCase().includes(q),
       );
     }
 
     if (selectedCategory !== "all") {
-      r = r.filter((c) => c.category?._id === selectedCategory);
+      r = r.filter(
+        (c) => (c.categoryId ?? c.category?._id) === selectedCategory,
+      );
     }
 
     if (selectedTier !== "all") {
@@ -157,19 +174,27 @@ export function NewCoursesClient({ courses, categories }: NewCoursesClientProps)
           All Courses
         </button>
 
-        {categories.map((cat) => (
-          <button
-            key={cat._id}
-            onClick={() => setSelectedCategory(cat._id)}
-            className={`flex-shrink-0 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
-              selectedCategory === cat._id
-                ? "bg-primary text-background shadow-lg shadow-primary/20"
-                : "bg-muted border border-border text-muted-foreground hover:text-foreground hover:border-primary/40"
-            }`}
-          >
-            {typeof cat.title === "string" ? cat.title : "Untitled Category"}
-          </button>
-        ))}
+        {categories.map((cat) => {
+          const categoryTitle =
+            typeof cat.title === "string" ? cat.title : "Untitled Category";
+
+          return (
+            <button
+              key={cat._id}
+              onClick={() => setSelectedCategory(cat._id)}
+              className={`flex-shrink-0 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+                selectedCategory === cat._id
+                  ? "bg-primary text-background shadow-lg shadow-primary/20"
+                  : "bg-muted border border-border text-muted-foreground hover:text-foreground hover:border-primary/40"
+              }`}
+            >
+              <span className="mr-2" aria-hidden="true">
+                {getCategoryEmoji(categoryTitle)}
+              </span>
+              {categoryTitle}
+            </button>
+          );
+        })}
       </div>
 
       <div className="flex flex-wrap items-center gap-3 mb-5">
@@ -242,7 +267,9 @@ export function NewCoursesClient({ courses, categories }: NewCoursesClientProps)
             <div className="w-20 h-20 rounded-2xl bg-muted border border-border flex items-center justify-center mb-5">
               <Search className="w-8 h-8 text-muted-foreground opacity-50" />
             </div>
-            <h3 className="text-lg font-bold text-foreground mb-2">No courses found</h3>
+            <h3 className="text-lg font-bold text-foreground mb-2">
+              No courses found
+            </h3>
             <p className="text-sm text-muted-foreground mb-5">
               Try different search terms or filters
             </p>
@@ -258,7 +285,10 @@ export function NewCoursesClient({ courses, categories }: NewCoursesClientProps)
             </button>
           </motion.div>
         ) : (
-          <motion.div key="grid" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <motion.div
+            key="grid"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+          >
             {filtered.map((course, i) => (
               <motion.div
                 key={course._id}
@@ -279,7 +309,11 @@ export function NewCoursesClient({ courses, categories }: NewCoursesClientProps)
 
 function CourseCardNew({ course }: { course: any }) {
   const categoryTitle =
-    typeof course?.category?.title === "string" ? course.category.title : "";
+    typeof course?.categoryTitle === "string"
+      ? course.categoryTitle
+      : typeof course?.category?.title === "string"
+        ? course.category.title
+        : "";
   const courseSlug =
     typeof course?.slug === "string"
       ? course.slug

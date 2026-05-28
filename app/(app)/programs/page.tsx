@@ -280,13 +280,13 @@ export default async function ProgramsPage() {
             </article>
           </div>
           <div className="mt-6 flex flex-wrap gap-2">
-            {categories.slice(0, 8).map((category) => (
+            {categories.slice(0, 8).map((categoryName) => (
               <Badge
-                key={category}
+                key={categoryName}
                 variant="secondary"
                 className="rounded-full border border-white/15 bg-white/5 px-3 py-1 font-mono text-zinc-200"
               >
-                {category}
+                {categoryName}
               </Badge>
             ))}
           </div>

@@ -16,7 +16,7 @@ interface CourseCardProps {
   completedLessons: number;
   href: string;
   level?: string | null;
-  category?: string | null;
+  category?: string | { title?: string | null } | null;
   estimatedTime?: string;
 }
 
@@ -36,7 +36,12 @@ export function CourseCard({
     safeTotal > 0 ? Math.round((safeCompleted / safeTotal) * 100) : 0;
 
   const difficultyLabel = level ?? "All Levels";
-  const categoryLabel = category ?? "General";
+  const categoryLabel =
+    typeof category === "string"
+      ? category
+      : typeof category?.title === "string"
+        ? category.title
+        : "General";
   const estimatedDuration =
     estimatedTime ?? `${Math.max(1, Math.ceil(safeTotal / 3))} hours`;
 

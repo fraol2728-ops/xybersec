@@ -38,7 +38,7 @@ export const ALL_COURSES_QUERY = defineQuery(`
     category-> {
       _id,
       title,
-      icon
+      "icon": coalesce(icon, "")
     },
     "moduleCount": count(modules),
     "lessonCount": count(modules[]->lessons[]),
@@ -171,12 +171,11 @@ export const DASHBOARD_COURSES_QUERY = defineQuery(`*[
   }
 }`);
 
-
 export const ALL_CATEGORIES_QUERY = defineQuery(`
   *[_type == "category"] | order(title asc) {
     _id,
     title,
-    icon,
+    "icon": coalesce(icon, ""),
     description
   }
 `);
@@ -354,7 +353,6 @@ export const LESSON_NAVIGATION_QUERY = defineQuery(`*[
     }
   }
 }`);
-
 
 export const FIRST_FREE_COURSE_QUERY = groq`
   *[_type == "course" && tier == "free"] 

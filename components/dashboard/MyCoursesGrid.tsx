@@ -15,7 +15,7 @@ interface DashboardCourse {
   completedLessons: number;
   href: string;
   level?: string | null;
-  category?: string | null;
+  category?: string | { title?: string | null } | null;
   estimatedTime?: string;
 }
 
@@ -66,20 +66,29 @@ export function MyCoursesGrid({ courses }: MyCoursesGridProps) {
           initial="hidden"
           animate="show"
         >
-          {filteredCourses.map((course) => (
-            <motion.div key={course.id} variants={itemVariants}>
-              <CourseCard
-                title={course.title}
-                thumbnailUrl={course.thumbnailUrl}
-                lessonCount={course.lessonCount}
-                completedLessons={course.completedLessons}
-                href={course.href}
-                level={course.level}
-                category={course.category}
-                estimatedTime={course.estimatedTime}
-              />
-            </motion.div>
-          ))}
+          {filteredCourses.map((course) => {
+            const categoryLabel =
+              typeof course.category === "string"
+                ? course.category
+                : typeof course.category?.title === "string"
+                  ? course.category.title
+                  : null;
+
+            return (
+              <motion.div key={course.id} variants={itemVariants}>
+                <CourseCard
+                  title={course.title}
+                  thumbnailUrl={course.thumbnailUrl}
+                  lessonCount={course.lessonCount}
+                  completedLessons={course.completedLessons}
+                  href={course.href}
+                  level={course.level}
+                  category={categoryLabel}
+                  estimatedTime={course.estimatedTime}
+                />
+              </motion.div>
+            );
+          })}
         </motion.div>
       ) : (
         <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 py-16 text-center">
